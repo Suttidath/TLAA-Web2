@@ -24,18 +24,8 @@ import { FiEdit } from "react-icons/fi";
 import { getUserAll } from "../service";
 import LinearProgress from "@mui/material/LinearProgress";
 import { Empty } from "antd";
-
-// const style = {
-//   position: "absolute",
-//   top: "50%",
-//   left: "50%",
-//   transform: "translate(-50%, -50%)",
-//   width: 800,
-//   bgcolor: "background.paper",
-//   //border: "1px solid #000",
-//   boxShadow: 16,
-//   p: 5,
-// };
+import { set } from "date-fns";
+import LoadingButton from "@mui/lab/LoadingButton";
 
 function TablePaginationActions(props) {
   const theme = useTheme();
@@ -142,6 +132,11 @@ const columns = [
 
 const statuses = [
   {
+    id: "2",
+    value: "All",
+    label: "-- All Status --",
+  },
+  {
     id: "1",
     value: "Active",
     label: "Active",
@@ -154,6 +149,11 @@ const statuses = [
 ];
 
 const Roles = [
+  {
+    id: "2",
+    value: "All",
+    label: "-- All Role --",
+  },
   {
     id: "1",
     value: "Admin",
@@ -172,10 +172,13 @@ export default function User() {
   const [dataUser, setDataUser] = useState([]);
   const [loading, setLoading] = useState(true);
   const [progress, setProgress] = React.useState(0);
+  const [loadingBT, setLoadingBT] = useState(false);
 
+  const [name, setName] = React.useState("");
   const [status, setStatus] = React.useState("");
-  const [username, setUsername] = React.useState("");
   const [role, setRole] = React.useState("");
+  const [statusCode, setStatusCode] = React.useState("");
+  const [roleCode, setRoleCode] = React.useState("");
 
   React.useEffect(() => {
     const timer = setInterval(() => {
@@ -210,23 +213,55 @@ export default function User() {
     setPage(0);
   };
 
-  //////////////// DropDown Box ////////////////
+  const handleChangeStatus = (e) => {
+    setStatus(e.target.value);
+    console.log(e.target.value);
+    if (e.target.value == "Active") {
+      setStatusCode("1");
+    } else if (e.target.value == "Inactive") {
+      setStatusCode("0");
+    } else if (e.target.value == "All") {
+      setStatusCode("");
+    }
+  };
 
-  const handleChangestatus = (event) => {
-    setStatus(event.target.value);
+  const handleChangeRole = (e) => {
+    setRole(e.target.value);
+    console.log(e.target.value);
+    if (e.target.value == "Admin") {
+      setRoleCode("1");
+    } else if (e.target.value == "User") {
+      setRoleCode("0");
+    } else if (e.target.value == "All") {
+      setRoleCode("");
+    }
+  };
+
+  const handleClickSearch = () => {
+    setLoading(true);
+    setLoadingBT(true);
+    GetUser();
   };
 
   //////////////// Get User List ////////////////
 
   const GetUser = () => {
     let qString = "?";
+    if (name) qString = qString + "&name=" + name;
+    if (statusCode) qString = qString + "&status=" + statusCode;
+    if (roleCode) qString = qString + "&role=" + roleCode;
+
     getUserAll(qString).then((res) => {
       console.log("Datauser", res.data);
+      console.log("name", name);
+      console.log("roleCode", roleCode);
+      console.log("statusCode", statusCode);
 
       if (res && res.status === 200) {
         setDataUser(res.data);
       }
       setLoading(false);
+      setLoadingBT(false);
     });
   };
 
@@ -286,9 +321,10 @@ export default function User() {
               ),
             }}
             fullWidth
-            value={username}
+            value={name}
             onChange={(e) => {
-              setUsername(e.target.value);
+              setName(e.target.value);
+              console.log(e.target.value);
             }}
           />
         </Box>
@@ -299,12 +335,14 @@ export default function User() {
             select
             label="Role"
             value={role}
-            onChange={(e) => {
-              setRole(e.target.value);
-            }}
+            onChange={handleChangeRole}
           >
             {Roles.map((option) => (
-              <MenuItem key={option.id} value={option.value}>
+              <MenuItem
+                key={option.id}
+                value={option.value}
+                sx={{ height: "30px" }}
+              >
                 {option.label}
               </MenuItem>
             ))}
@@ -318,7 +356,7 @@ export default function User() {
             select
             label="Status"
             value={status}
-            onChange={handleChangestatus}
+            onChange={handleChangeStatus}
           >
             {statuses.map((option) => (
               <MenuItem key={option.id} value={option.value}>
@@ -327,9 +365,16 @@ export default function User() {
             ))}
           </TextField>
         </Box>
-        <Button variant="contained" size="small" style={{ width: "80px" }}>
-          <Typography fontSize={14}>ค้นหา</Typography>
-        </Button>
+
+        <LoadingButton
+          onClick={handleClickSearch}
+          loading={loadingBT}
+          loadingIndicator="Loading…"
+          variant="contained"
+          style={{ width: "80px" }}
+        >
+          <span style={{ fontSize: "14px" }}>ค้นหา</span>
+        </LoadingButton>
       </Box>
 
       {/*  ////////////////////////// Data Table ////////////////////////// */}

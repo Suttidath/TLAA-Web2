@@ -23,18 +23,22 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import CircularProgress from "@mui/material/CircularProgress";
+import LoadingButton from "@mui/lab/LoadingButton";
+import CloseIcon from "@mui/icons-material/Close";
+import SaveIcon from "@mui/icons-material/Save";
 
-// const style = {
-//   position: "absolute",
-//   top: "50%",
-//   left: "50%",
-//   transform: "translate(-50%, -50%)",
-//   width: 800,
-//   bgcolor: "background.paper",
-//   //border: "1px solid #000",
-//   boxShadow: 16,
-//   p: 5,
-// };
+const styleModal = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 450,
+  height: 200,
+  bgcolor: "background.paper",
+  borderRadius: 2,
+  boxShadow: 24,
+  p: 3,
+};
 
 export default function User() {
   const [values, setValues] = useState({});
@@ -51,10 +55,22 @@ export default function User() {
   const [fax, setFax] = React.useState("");
   const [tax, setTax] = React.useState("");
 
+  const [openModal, setOpenModal] = useState(false);
+  const [loadingbutton, setloadingbutton] = useState(false);
+  const handleOpenModal = () => setOpenModal(true);
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
+
+  const handleClickModal = () => {
+    setloadingbutton(true);
+    Addmember();
+  };
+
   //////////////// Add User ////////////////
 
   const Addmember = () => {
-    setLoading(false);
+    //setLoading(false);
 
     values["company_name"] = thaiName;
     values["company_name_eng"] = engName;
@@ -73,6 +89,7 @@ export default function User() {
       console.log("postAdduser: values", values);
 
       if (response && (response.status === 200 || response.status === 201)) {
+        handleCloseModal();
         Swal.fire({
           position: "center",
           icon: "success",
@@ -86,13 +103,14 @@ export default function User() {
           "API response error1 [" + response.status + "]",
           response.data.message
         );
+        handleCloseModal();
         Swal.fire({
           icon: "error",
           title: "Oops...",
           text: "ไม่สามารถเพิ่ม Member ได้ !!",
         });
       }
-      setLoading(true);
+      setloadingbutton(false);
     });
   };
 
@@ -311,7 +329,7 @@ export default function User() {
           mt: 9,
           width: 400,
           display: "flex",
-          justifyContent: "space-between",
+          justifyContent: "start",
         }}
       >
         <Box>
@@ -319,7 +337,7 @@ export default function User() {
             variant="contained"
             size="middle"
             style={{ backgroundColor: "#32B917", marginRight: "15px" }}
-            onClick={Addmember}
+            onClick={handleOpenModal}
           >
             <Typography fontSize={14}>Add Member</Typography>
           </Button>
@@ -335,16 +353,55 @@ export default function User() {
             </Button>
           </Link>
         </Box>
-        <Box>
-          {!loading ? (
-            <Box sx={{ width: "100%" }}>
-              <CircularProgress disableShrink />
-            </Box>
-          ) : (
-            ""
-          )}
-        </Box>
       </Box>
+
+      <Modal open={openModal}>
+        <Box sx={styleModal}>
+          <Box style={{ display: "flex", justifyContent: "space-between" }}>
+            <Typography marginTop={1} variant="h5" component="h2">
+              Add Member
+            </Typography>
+            <IconButton size="large">
+              <CloseIcon fontSize="inherit" onClick={handleCloseModal} />
+            </IconButton>
+          </Box>
+          <Typography
+            sx={{ mt: 3, color: "#616161" }}
+            fontSize={14}
+            fontWeight={300}
+          >
+            Do you want to confirm add Member
+          </Typography>
+          <Box
+            style={{
+              display: "flex",
+              justifyContent: "end",
+              marginTop: "5rem",
+            }}
+          >
+            <LoadingButton
+              color="primary"
+              onClick={handleClickModal}
+              loading={loadingbutton}
+              loadingPosition="start"
+              startIcon={<SaveIcon />}
+              variant="contained"
+              size="large"
+            >
+              <span>Save</span>
+            </LoadingButton>
+            <Button
+              style={{ marginLeft: 12 }}
+              variant="outlined"
+              size="middle"
+              color="inherit"
+              onClick={handleCloseModal}
+            >
+              <Typography fontSize={14}>cancel</Typography>
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
     </Box>
   );
 }

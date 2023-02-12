@@ -41,6 +41,10 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import ReactMonthPicker from "react-month-picker";
 import "react-month-picker/css/month-picker.css";
 import moment from "moment";
+import LoadingButton from "@mui/lab/LoadingButton";
+import CloseIcon from "@mui/icons-material/Close";
+import SaveIcon from "@mui/icons-material/Save";
+import { set } from "date-fns";
 
 const style = {
   position: "absolute",
@@ -49,8 +53,22 @@ const style = {
   transform: "translate(-50%, -50%)",
   width: 400,
   bgcolor: "background.paper",
-  boxShadow: 16,
+  borderRadius: 3,
+  boxShadow: 24,
   p: 4,
+};
+
+const styleModal = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 500,
+  height: 200,
+  bgcolor: "background.paper",
+  borderRadius: 3,
+  boxShadow: 24,
+  p: 3,
 };
 
 function TablePaginationActions(props) {
@@ -324,6 +342,10 @@ const years = [
 
 const forms = [
   {
+    value: "All",
+    label: "-- All Form --",
+  },
+  {
     value: "A",
     label: "A",
   },
@@ -334,6 +356,10 @@ const forms = [
 ];
 
 const statuses = [
+  {
+    value: "All",
+    label: "-- All Status --",
+  },
   {
     value: "Confirm",
     label: "Confirm",
@@ -414,26 +440,35 @@ export default function Monthly() {
   const [year, setYear] = useState("");
   const [form, setForm] = useState("");
   const [status, setStatus] = useState("");
+  const [statusCode, setStatusCode] = useState("");
+  const [formCode, setFormCode] = useState("");
+
+  const [errorMsg, setErrorMsg] = useState("");
 
   const [insuranceid, setInsuranceid] = useState("");
   const [loadingAddform, setLoadingAddform] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [loadingSh, setLoadingSh] = useState(false);
+
   const [insurance, setInsurance] = useState([]);
   const [dataMonthly, setDataMonthly] = useState([]);
   const [values, setValues] = useState({});
 
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+    setErrorMsg("");
+  };
 
-  const [openEditA, setOpenEditA] = useState(false);
-  const handleOpenEditA = () => setOpenEditA(true);
-  const handleCloseEditA = () => setOpenEditA(false);
-
-  const [openEditB, setOpenEditB] = useState(false);
-  const handleOpenEditB = () => setOpenEditB(true);
-  const handleCloseEditB = () => setOpenEditB(false);
-
+  const [openModal, setOpenModal] = useState(false);
+  const [loadingbutton, setloadingbutton] = useState(false);
+  const handleOpenModal = () => setOpenModal(true);
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    handleRemove();
+    handleClearData();
+  };
   const [formimport, setFormimport] = useState("");
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState(null);
@@ -446,6 +481,9 @@ export default function Monthly() {
   const [selectmonth, setSelectMonth] = React.useState(
     moment().format("YYYY-MM")
   );
+
+  let monthtrim = selectmonth.substring(5, 7);
+  let yeartrim = selectmonth.substring(0, 4);
 
   const [importmonth, setImportMonth] = React.useState(
     moment().format("YYYY-MM")
@@ -499,7 +537,7 @@ export default function Monthly() {
   ////////// for get DataUser //////////
   React.useEffect(() => {
     GetMonthly();
-    GetInsurance();
+    //GetInsurance();
   }, []);
 
   const fileRef = useRef();
@@ -523,21 +561,23 @@ export default function Monthly() {
     setPage(0);
   };
 
-  //////////////// DropDown Box ////////////////
-  // const handleChangemonth = (event) => {
-  //   setMonth(event.target.value);
-  // };
-
-  // const handleChangeyear = (event) => {
-  //   setYear(event.target.value);
-  // };
-
   const handleChangeform = (event) => {
     setForm(event.target.value);
+    if (event.target.value == "All") {
+      setFormCode("");
+    }
+    console.log(event.target.value);
   };
 
   const handleChangestatus = (event) => {
     setStatus(event.target.value);
+    if (event.target.value == "Confirm") {
+      setStatusCode("1");
+    } else if (event.target.value == "Wait to confirm") {
+      setStatusCode("0");
+    } else if (event.target.value == "All") {
+      setStatusCode("");
+    }
   };
 
   const handleChangeformimport = (event) => {
@@ -552,11 +592,66 @@ export default function Monthly() {
   const handleChangemonth = (newValue) => {
     setSelectMonth(newValue.format("YYYY-MM"));
     console.log(newValue.format("YYYY-MM"));
+    console.log(monthtrim);
+    console.log(yeartrim);
   };
 
   const handleImportMonth = (newValue) => {
     setImportMonth(newValue.format("YYYY-MM"));
     console.log(newValue.format("YYYY-MM"));
+  };
+
+  const handleClickModal = () => {
+    setloadingbutton(true);
+    addFormA();
+  };
+
+  const handleClearData = () => {
+    //for Table 1
+    setCompany("");
+    setTemplate("");
+    setMemberNo("");
+    setYearly("");
+    setMonthy("");
+    setDataType("");
+    setOrder("");
+
+    //for Table 2
+    setOrd1("");
+    setOrd2("");
+    setOrd3("");
+
+    setInd1("");
+    setInd2("");
+    setInd3("");
+
+    setTerm1("");
+    setTerm2("");
+    setTerm3("");
+
+    setEndo1("");
+    setEndo2("");
+    setEndo3("");
+
+    setMor1("");
+    setMor2("");
+    setMor3("");
+
+    setOth1("");
+    setOth2("");
+    setOth3("");
+
+    setPAind1("");
+    setPAind2("");
+    setPAind3("");
+
+    setPAgro1("");
+    setPAgro2("");
+    setPAgro3("");
+
+    setPAstu1("");
+    setPAstu2("");
+    setPAstu3("");
   };
 
   //////////////// Import file xlsx ////////////////
@@ -585,6 +680,7 @@ export default function Monthly() {
 
     setFile(myFile);
     setFileName(myFile.name);
+    setErrorMsg("");
 
     if (jsonData[1].__EMPTY_1 == "tplPC1T2A") {
       //for Table 1
@@ -703,34 +799,48 @@ export default function Monthly() {
     console.log("datawb", jsonData);
   };
 
+  const handleClickSearch = () => {
+    setLoading(true);
+    setLoadingSh(true);
+    GetMonthly();
+  };
+
   //////////////// Get DataMonthly List ////////////////
   const GetMonthly = () => {
     let qString = "?";
+    if (companyname) qString = qString + "&company_name=" + companyname;
+    if (yeartrim) qString = qString + "&year=" + yeartrim;
+    if (monthtrim) qString = qString + "&month=" + monthtrim;
+    if (formCode) qString = qString + "&formtype=" + formCode;
+    if (statusCode) qString = qString + "&status=" + statusCode;
+
     getMonthly(qString).then((res) => {
       console.log("Datamonthly", res.data);
       if (res && res.status === 200) {
         setDataMonthly(res.data);
       }
+      setLoading(false);
+      setLoadingSh(false);
     });
   };
 
-  //////////////// Get User List ////////////////
-  const GetInsurance = () => {
-    let qString = "?";
-    getCompanyAll(qString).then((res) => {
-      console.log("Datamember1", res.data);
-      //console.log(res.data.message);
-      if (res && res.status === 200) {
-        setInsurance(res.data);
-      }
-      setLoading(false);
-    });
-  };
+  // //////////////// Get User List ////////////////
+  // const GetInsurance = () => {
+  //   let qString = "?";
+  //   getCompanyAll(qString).then((res) => {
+  //     console.log("Datamember1", res.data);
+  //     //console.log(res.data.message);
+  //     if (res && res.status === 200) {
+  //       setInsurance(res.data);
+  //     }
+  //     setLoading(false);
+  //   });
+  // };
 
   //////////////// Add User ////////////////
 
   const addFormA = () => {
-    setLoadingAddform(false);
+    //setLoadingAddform(false);
 
     values["company_name"] = company;
     values["template"] = template;
@@ -779,8 +889,8 @@ export default function Monthly() {
     postAddformA(values).then((response) => {
       console.log("postAdduser: response", response);
       console.log("postAdduser: values", values);
-
       if (response && (response.status === 200 || response.status === 201)) {
+        setOpenModal(false);
         Swal.fire({
           position: "center",
           icon: "success",
@@ -794,13 +904,14 @@ export default function Monthly() {
           "API response error1 [" + response.status + "]",
           response.data.message
         );
+        setOpenModal(false);
         Swal.fire({
           icon: "error",
           title: "Oops...",
           text: response.data.message,
         });
       }
-      setLoadingAddform(true);
+      setloadingbutton(false);
     });
   };
 
@@ -866,6 +977,7 @@ export default function Monthly() {
             value={companyname}
             onChange={(e) => {
               setCompanyname(e.target.value);
+              console.log(e.target.value);
             }}
           />
         </Box>
@@ -918,14 +1030,15 @@ export default function Monthly() {
           </TextField>
         </Box>
 
-        <Button
+        <LoadingButton
+          onClick={handleClickSearch}
+          loading={loadingSh}
+          loadingIndicator="Loading…"
           variant="contained"
-          size="small"
           style={{ width: "80px" }}
-          // onClick={getData}
         >
-          <Typography fontSize={14}>ค้นหา</Typography>
-        </Button>
+          <span style={{ fontSize: "14px" }}>ค้นหา</span>
+        </LoadingButton>
       </Box>
 
       {/*  ////////////////////////// Data Table ////////////////////////// */}
@@ -1111,59 +1224,8 @@ export default function Monthly() {
               display: "flex",
               flexDirection: "column",
               width: "100%",
-              //justifyContent: "center",
-              //border: "1px solid #000",
-              //alignItems: "center",
             }}
           >
-            {/* <Box sx={{ width: 400, mt: 2 }}>
-              <TextField
-                label="Form A or B"
-                variant="outlined"
-                size="middle"
-                select
-                fullWidth
-                value={formimport}
-                onChange={handleChangeformimport}
-              >
-                {forms.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Box>
-            <Box sx={{ width: 400, mt: 2 }}>
-              <TextField
-                label="Select Insurance Company"
-                variant="outlined"
-                size="middle"
-                select
-                fullWidth
-                value={insuranceid}
-                onChange={handleChangeinsuranceid}
-              >
-                {insurance.map((option, index) => (
-                  <MenuItem key={option.company_id} value={option.company_id}>
-                    {option.company_name}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Box>
-            <Box sx={{ width: 400, mt: 2 }}>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DesktopDatePicker
-                  disableFuture
-                  label="Month and Year"
-                  inputFormat="YYYY-MM"
-                  views={["year", "month"]}
-                  value={importmonth}
-                  onChange={handleImportMonth}
-                  renderInput={(params) => <TextField {...params} />}
-                />
-              </LocalizationProvider>
-            </Box> */}
-
             <Box
               sx={{
                 display: "flex",
@@ -1196,72 +1258,143 @@ export default function Monthly() {
                   onChange={(e) => handleFile(e)}
                   ref={fileRef}
                 />
-                {fileName && <ClearIcon onClick={handleRemove} />}
+                {fileName && (
+                  <ClearIcon
+                    onClick={() => {
+                      handleRemove();
+                      handleClearData();
+                    }}
+                  />
+                )}
               </Box>
             </Box>
           </Box>
-          <Box
-            sx={{
-              mt: 3,
-              display: "flex",
-              flexDirection: "column",
-              width: "100%",
-            }}
-          >
-            <Typography fontSize={14}>
-              <span style={{ color: "#1565c0", fontWeight: 500 }}>
-                ชื่อบริษัท :{" "}
-              </span>
-              {company}
-            </Typography>
-            <Typography fontSize={14}>
-              <span style={{ color: "#1565c0", fontWeight: 500 }}>
-                Form Import :{" "}
-              </span>
-              {temptrim}
-            </Typography>
-            <Typography fontSize={14}>
-              <span style={{ color: "#1565c0", fontWeight: 500 }}>
-                ประจำเดือน :{" "}
-              </span>
-              {monthy}
-            </Typography>
-            <Typography fontSize={14}>
-              <span style={{ color: "#1565c0", fontWeight: 500 }}>
-                ประจำปี :{" "}
-              </span>
-              {yearly}
-            </Typography>
-          </Box>
+          {fileName && (
+            <Box
+              sx={{
+                mt: 3,
+                display: "flex",
+                flexDirection: "column",
+                width: "100%",
+              }}
+            >
+              <Typography fontSize={14}>
+                <span style={{ color: "#1565c0", fontWeight: 500 }}>
+                  ชื่อบริษัท :{" "}
+                </span>
+                {company}
+              </Typography>
+              <Typography fontSize={14}>
+                <span style={{ color: "#1565c0", fontWeight: 500 }}>
+                  Form Import :{" "}
+                </span>
+                {temptrim}
+              </Typography>
+              <Typography fontSize={14}>
+                <span style={{ color: "#1565c0", fontWeight: 500 }}>
+                  ประจำเดือน :{" "}
+                </span>
+                {monthy}
+              </Typography>
+              <Typography fontSize={14}>
+                <span style={{ color: "#1565c0", fontWeight: 500 }}>
+                  ประจำปี :{" "}
+                </span>
+                {yearly}
+              </Typography>
+            </Box>
+          )}
 
           <Box
             sx={{
               mt: 5,
               display: "flex",
               width: "100%",
-              justifyContent: "end",
+              justifyContent: "space-between",
             }}
           >
-            <Button
+            <Box>
+              <Typography color="error" variant="h6" fontWeight={400}>
+                {errorMsg}
+              </Typography>
+            </Box>
+            <Box>
+              <Button
+                variant="contained"
+                size="middle"
+                style={{ backgroundColor: "#32B917", marginRight: "15px" }}
+                onClick={() => {
+                  if (fileName) {
+                    handleOpenModal();
+                    handleClose();
+                  } else {
+                    setErrorMsg("** Please choose file excel");
+                  }
+                  //addFormA();
+                }}
+              >
+                <Typography fontSize={14}>Import</Typography>
+              </Button>
+              <Button
+                variant="contained"
+                size="middle"
+                color="inherit"
+                onClick={() => {
+                  handleClose();
+                  handleRemove();
+                  handleClearData();
+                }}
+              >
+                <Typography fontSize={14}>Back</Typography>
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+      </Modal>
+
+      <Modal open={openModal}>
+        <Box sx={styleModal}>
+          <Box style={{ display: "flex", justifyContent: "space-between" }}>
+            <Typography marginTop={1} variant="h5" component="h2">
+              Import data form
+            </Typography>
+            <IconButton size="large">
+              <CloseIcon fontSize="inherit" onClick={handleCloseModal} />
+            </IconButton>
+          </Box>
+          <Typography
+            sx={{ mt: 3, color: "#616161" }}
+            fontSize={14}
+            fontWeight={300}
+          >
+            Do you want to confirm import data
+          </Typography>
+          <Box
+            style={{
+              display: "flex",
+              justifyContent: "end",
+              marginTop: "5rem",
+            }}
+          >
+            <LoadingButton
+              color="primary"
+              onClick={handleClickModal}
+              loading={loadingbutton}
+              loadingPosition="start"
+              startIcon={<SaveIcon />}
               variant="contained"
-              size="middle"
-              style={{ backgroundColor: "#32B917", marginRight: "15px" }}
-              onClick={() => {
-                addFormA();
-              }}
+              size="large"
             >
-              <Typography fontSize={14}>Import</Typography>
-            </Button>
+              <span>Save</span>
+            </LoadingButton>
             <Button
-              variant="contained"
+              style={{ marginLeft: 12 }}
+              variant="outlined"
               size="middle"
               color="inherit"
-              onClick={() => {
-                handleClose();
-                handleRemove();
-              }}
+              onClick={handleCloseModal}
             >
-              <Typography fontSize={14}>Back</Typography>
+              <Typography fontSize={14}>cancel</Typography>
             </Button>
           </Box>
         </Box>

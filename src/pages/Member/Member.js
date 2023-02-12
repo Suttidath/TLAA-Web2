@@ -29,6 +29,7 @@ import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
+import LoadingButton from "@mui/lab/LoadingButton";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -338,10 +339,17 @@ const months = [
 
 const statuses = [
   {
+    id: "2",
+    value: "All",
+    label: "-- All Status --",
+  },
+  {
+    id: "0",
     value: "Active",
     label: "Active",
   },
   {
+    id: "1",
     value: "Inactive",
     label: "Inactive",
   },
@@ -352,9 +360,11 @@ export default function Member() {
   const [rowsPerPage, setRowsPerPage] = React.useState(10);
   const [loading, setLoading] = React.useState(true);
   const [dataMember, setDataMember] = React.useState([]);
+  const [loadingBT, setLoadingBT] = React.useState(false);
 
   const [membername, setMembername] = React.useState("");
   const [status, setStatus] = React.useState("");
+  const [statusCode, setStatusCode] = React.useState("");
 
   const [openedit, setOpenedit] = React.useState(false);
   const handleOpenedit = () => setOpenedit(true);
@@ -414,22 +424,38 @@ export default function Member() {
 
   //////////////// DropDown Box ////////////////
 
-  const handleChangemembername = (event) => {
-    setMembername(event.target.value);
+  const handleChangemembername = (e) => {
+    setMembername(e.target.value);
   };
 
-  const handleChangestatus = (event) => {
-    setStatus(event.target.value);
+  const handleChangeStatus = (e) => {
+    setStatus(e.target.value);
+    console.log(e.target.value);
+    if (e.target.value == "Active") {
+      setStatusCode("1");
+    } else if (e.target.value == "Inactive") {
+      setStatusCode("0");
+    } else if (e.target.value == "All") {
+      setStatusCode("");
+    }
   };
-
   const handleChangeSwitch = (event) => {
     setChecked(event.target.checked);
+  };
+
+  const handleClickSearch = () => {
+    setLoading(true);
+    setLoadingBT(true);
+    GetMember();
   };
 
   //////////////// Get User List ////////////////
 
   const GetMember = () => {
     let qString = "?";
+    if (membername) qString = qString + "&name=" + membername;
+    if (statusCode) qString = qString + "&status=" + statusCode;
+
     getCompanyAll(qString).then((res) => {
       console.log("Datamember", res.data);
       console.log(res.data.message);
@@ -437,6 +463,7 @@ export default function Member() {
         setDataMember(res.data);
       }
       setLoading(false);
+      setLoadingBT(false);
     });
   };
 
@@ -497,9 +524,7 @@ export default function Member() {
             }}
             fullWidth
             value={membername}
-            onChange={(e) => {
-              setMembername(e.target.value);
-            }}
+            onChange={handleChangemembername}
           />
         </Box>
 
@@ -511,7 +536,7 @@ export default function Member() {
             select
             label="Status"
             value={status}
-            onChange={handleChangestatus}
+            onChange={handleChangeStatus}
           >
             {statuses.map((option, index) => (
               <MenuItem key={index} value={option.value}>
@@ -521,14 +546,15 @@ export default function Member() {
           </TextField>
         </Box>
 
-        <Button
+        <LoadingButton
+          onClick={handleClickSearch}
+          loading={loadingBT}
+          loadingIndicator="Loading…"
           variant="contained"
-          size="small"
           style={{ width: "80px" }}
-          // onClick={getData}
         >
-          <Typography fontSize={14}>ค้นหา</Typography>
-        </Button>
+          <span style={{ fontSize: "14px" }}>ค้นหา</span>
+        </LoadingButton>
       </Box>
 
       {/*  ////////////////////////// Data Table ////////////////////////// */}

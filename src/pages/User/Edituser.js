@@ -41,17 +41,21 @@ import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
 import CircularProgress from "@mui/material/CircularProgress";
+import LoadingButton from "@mui/lab/LoadingButton";
+import CloseIcon from "@mui/icons-material/Close";
+import SaveIcon from "@mui/icons-material/Save";
 
-const style = {
+const styleModal = {
   position: "absolute",
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 800,
+  width: 450,
+  height: 200,
   bgcolor: "background.paper",
-  //border: "1px solid #000",
-  boxShadow: 16,
-  p: 5,
+  borderRadius: 2,
+  boxShadow: 24,
+  p: 3,
 };
 
 function TablePaginationActions(props) {
@@ -211,6 +215,18 @@ export default function User() {
 
   const { id } = useParams();
 
+  const [openModal, setOpenModal] = useState(false);
+  const [loadingbutton, setloadingbutton] = useState(false);
+  const handleOpenModal = () => setOpenModal(true);
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
+
+  const handleClickModal = () => {
+    setloadingbutton(true);
+    Edituser();
+  };
+
   ////////// for Progress loading //////////
   React.useEffect(() => {
     const timer = setInterval(() => {
@@ -293,7 +309,7 @@ export default function User() {
   //////////////// Edit User ////////////////
 
   const Edituser = () => {
-    setLoading(false);
+    //setLoading(false);
     values["id"] = id;
     values["phone"] = phone;
     values["position"] = position;
@@ -329,6 +345,7 @@ export default function User() {
       console.log("postid: values", values);
 
       if (response && (response.status === 200 || response.status === 201)) {
+        handleCloseModal();
         Swal.fire({
           position: "center",
           icon: "success",
@@ -342,13 +359,15 @@ export default function User() {
           "API response error1 [" + response.status + "]",
           response.data.message
         );
+        handleCloseModal();
         Swal.fire({
           icon: "error",
           title: "Oops...",
           text: "ไม่สามารถ Update User ได้ !!",
         });
       }
-      setLoading(true);
+      //setLoading(true);
+      setloadingbutton(false);
     });
   };
 
@@ -642,9 +661,9 @@ export default function User() {
             variant="contained"
             size="middle"
             style={{ backgroundColor: "#32B917", marginRight: "15px" }}
-            onClick={Edituser}
+            onClick={handleOpenModal}
           >
-            <Typography fontSize={14}>Update</Typography>
+            <Typography fontSize={14}>Edit User</Typography>
           </Button>
           <Link
             underline="hover"
@@ -668,6 +687,54 @@ export default function User() {
           )}
         </Box>
       </Box>
+
+      <Modal open={openModal}>
+        <Box sx={styleModal}>
+          <Box style={{ display: "flex", justifyContent: "space-between" }}>
+            <Typography marginTop={1} variant="h5" component="h2">
+              Edit User
+            </Typography>
+            <IconButton size="large">
+              <CloseIcon fontSize="inherit" onClick={handleCloseModal} />
+            </IconButton>
+          </Box>
+          <Typography
+            sx={{ mt: 3, color: "#616161" }}
+            fontSize={14}
+            fontWeight={300}
+          >
+            Do you want to confirm edit User
+          </Typography>
+          <Box
+            style={{
+              display: "flex",
+              justifyContent: "end",
+              marginTop: "5rem",
+            }}
+          >
+            <LoadingButton
+              color="primary"
+              onClick={handleClickModal}
+              loading={loadingbutton}
+              loadingPosition="start"
+              startIcon={<SaveIcon />}
+              variant="contained"
+              size="large"
+            >
+              <span>Update</span>
+            </LoadingButton>
+            <Button
+              style={{ marginLeft: 12 }}
+              variant="outlined"
+              size="middle"
+              color="inherit"
+              onClick={handleCloseModal}
+            >
+              <Typography fontSize={14}>cancel</Typography>
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
     </Box>
   );
 }

@@ -25,6 +25,7 @@ import { FiEdit } from "react-icons/fi";
 import { BsFillXCircleFill } from "react-icons/bs";
 import excel from "../../img/excel.png";
 import pdf from "../../img/PDF_file_icon.svg.webp";
+import word from "../../img/word.png";
 import { getReport } from "../service";
 import moment from "moment/moment";
 //import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -35,6 +36,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { DatePicker, Space } from "antd";
 import LinearProgress from "@mui/material/LinearProgress";
+import LoadingButton from "@mui/lab/LoadingButton";
 import { Empty } from "antd";
 
 function createData(name, calories, fat, form, status, date, time) {
@@ -252,15 +254,18 @@ const years = [
 
 export default function Issuereport() {
   const [reportname, setReportname] = React.useState("");
-  const [month, setMonth] = React.useState("");
-  const [year, setYear] = React.useState("");
   const [loading, setLoading] = React.useState(true);
+  const [loadingSh, setLoadingSh] = React.useState(false);
+
   const [progress, setProgress] = React.useState(0);
 
   const [DataReport, setDataReport] = React.useState([]);
-  const [selectdate, setSelectdate] = React.useState(
+  const [selectmonth, setSelectmonth] = React.useState(
     moment().format("YYYY-MM")
   );
+
+  let monthtrim = selectmonth.substring(5, 7);
+  let yeartrim = selectmonth.substring(0, 4);
 
   React.useEffect(() => {
     GetDataReportdefault();
@@ -286,8 +291,14 @@ export default function Issuereport() {
   //////////////// DropDown Box ////////////////
 
   const handleChange = (newValue) => {
-    setSelectdate(newValue.format("YYYY-MM"));
+    setSelectmonth(newValue.format("YYYY-MM"));
     console.log(newValue.format("YYYY-MM"));
+  };
+
+  const handleClickSearch = () => {
+    setLoading(true);
+    setLoadingSh(true);
+    GetSearchReport();
   };
 
   const monthdf = moment().format("MM");
@@ -296,14 +307,30 @@ export default function Issuereport() {
   //////////////// Get User List ////////////////
 
   const GetDataReportdefault = () => {
-    //let qString = "?year=2023&month=01";
     let qString = "?year=" + yeardf + "&month=" + monthdf;
+
     getReport(qString).then((res) => {
       console.log("DataReport", res.data);
       if (res && res.status === 200) {
         setDataReport(res.data);
       }
       setLoading(false);
+    });
+  };
+
+  const GetSearchReport = () => {
+    let qString = "?";
+    if (reportname) qString = qString + "&report_name=" + reportname;
+    if (yeartrim) qString = qString + "&year=" + yeartrim;
+    if (monthtrim) qString = qString + "&month=" + monthtrim;
+
+    getReport(qString).then((res) => {
+      console.log("DataReport", res.data);
+      if (res && res.status === 200) {
+        setDataReport(res.data);
+      }
+      setLoading(false);
+      setLoadingSh(false);
     });
   };
 
@@ -379,21 +406,22 @@ export default function Issuereport() {
               label="Select Month and Year"
               inputFormat="YYYY-MM"
               views={["year", "month"]}
-              value={selectdate}
+              value={selectmonth}
               onChange={handleChange}
               renderInput={(params) => <TextField {...params} />}
             />
           </LocalizationProvider>
         </Box>
 
-        <Button
+        <LoadingButton
+          onClick={handleClickSearch}
+          loading={loadingSh}
+          loadingIndicator="Loading…"
           variant="contained"
-          size="small"
           style={{ width: "80px" }}
-          // onClick={getData}
         >
-          <Typography fontSize={14}>ค้นหา</Typography>
-        </Button>
+          <span style={{ fontSize: "14px" }}>ค้นหา</span>
+        </LoadingButton>
       </Box>
 
       {/*  ////////////////////////// Data Table ////////////////////////// */}
@@ -490,11 +518,11 @@ export default function Issuereport() {
                         />
                       ) : (
                         <img
-                          alt="pdfLogo"
-                          src={pdf}
+                          alt="wordLogo"
+                          src={word}
                           style={{
                             display: "flex",
-                            width: "23px",
+                            width: "24px",
                             height: "27px",
                             cursor: "pointer",
                           }}

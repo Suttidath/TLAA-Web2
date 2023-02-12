@@ -74,7 +74,7 @@ const styleModal = {
   width: 500,
   height: 200,
   bgcolor: "background.paper",
-  //border: "1px solid #000",
+  borderRadius: 3,
   boxShadow: 24,
   p: 3,
 };
@@ -350,7 +350,7 @@ export default function MonthlyEdit() {
           text: "ไม่สามารถ Update data form ได้ !!",
         });
       }
-      setloadingbutton(true);
+      setloadingbutton(false);
     });
   };
 

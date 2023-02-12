@@ -1,4 +1,4 @@
-import React, { useState, useRef,useCallback } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import PropTypes from "prop-types";
 import { useTheme } from "@mui/material/styles";
 import { Link, useParams } from "react-router-dom";
@@ -30,7 +30,12 @@ import {
 } from "@mui/material";
 import InputAdornment from "@mui/material/InputAdornment";
 
-import { getCompany, postEditmember, getCompanyRecord , postChangecom} from "../service";
+import {
+  getCompany,
+  postEditmember,
+  getCompanyRecord,
+  postChangecom,
+} from "../service";
 import LinearProgress from "@mui/material/LinearProgress";
 import { Empty } from "antd";
 import Swal from "sweetalert2";
@@ -48,24 +53,27 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import Skeleton from "@mui/material/Skeleton";
 import CircularProgress from "@mui/material/CircularProgress";
-import dayjs from 'dayjs';
-import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import dayjs from "dayjs";
+import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import moment from "moment/moment";
-import { DesktopDatePicker } from '@mui/x-date-pickers/DesktopDatePicker';
+import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
+import LoadingButton from "@mui/lab/LoadingButton";
+import CloseIcon from "@mui/icons-material/Close";
+import SaveIcon from "@mui/icons-material/Save";
 
-
-
-const style = {
+const styleModal = {
   position: "absolute",
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 800,
+  width: 450,
+  height: 200,
   bgcolor: "background.paper",
-  //border: "1px solid #000",
-  boxShadow: 16,
-  p: 5,
+  borderRadius: 2,
+  boxShadow: 24,
+  p: 3,
 };
+
 const style2 = {
   position: "absolute",
   top: "50%",
@@ -284,6 +292,20 @@ export default function User() {
 
   const { id } = useParams();
 
+  //////////////// Modal confirm edit member ////////////////
+
+  const [openModal, setOpenModal] = useState(false);
+  const [loadingbutton, setloadingbutton] = useState(false);
+  const handleOpenModal = () => setOpenModal(true);
+  const handleCloseModal = () => {
+    setOpenModal(false);
+  };
+
+  const handleClickModal = () => {
+    setloadingbutton(true);
+    Editmember();
+  };
+
   //////////////// change company name ////////////////
   const [newThaiName, setNewThaiName] = React.useState("");
   const [newEngName, setNewEngName] = React.useState("");
@@ -296,8 +318,6 @@ export default function User() {
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
-
-  
 
   ////////// for Progress loading //////////
   React.useEffect(() => {
@@ -316,24 +336,24 @@ export default function User() {
     };
   }, []);
 
-
   /////// for datetimepicker ////////
 
-  const [selectdate, setSelectdate] = React.useState(moment().format("YYYY-MM-DD"));;
+  const [selectdate, setSelectdate] = React.useState(
+    moment().format("YYYY-MM-DD")
+  );
 
   const handleChangedate = (newValue) => {
     setSelectdate(newValue.format("YYYY-MM-DD"));
     console.log(newValue.format("YYYY-MM-DD"));
   };
 
-   const time = moment().format("hh:mm:ss");
+  const time = moment().format("hh:mm:ss");
   //  const yeardf = moment().format('YYYY');
 
   ////////// for get DataUser //////////
   React.useEffect(() => {
     getDatacompany();
     getDatacompanyRecord();
-    
   }, []);
 
   const handleChangeSwitch = (event) => {
@@ -373,7 +393,7 @@ export default function User() {
   //////////////// Edit Member ////////////////
 
   const Editmember = () => {
-    setLoadingEditmember(false);
+    //setLoadingEditmember(false);
     values["id"] = id;
     values["company_name"] = thaiName;
     values["company_name_eng"] = engName;
@@ -398,6 +418,7 @@ export default function User() {
       console.log("postid: values", values);
 
       if (response && (response.status === 200 || response.status === 201)) {
+        handleCloseModal();
         Swal.fire({
           position: "center",
           icon: "success",
@@ -411,20 +432,22 @@ export default function User() {
           "API response error1 [" + response.status + "]",
           response.data.message
         );
+        handleCloseModal();
         Swal.fire({
           icon: "error",
           title: "Oops...",
           text: "ไม่สามารถ Update Member ได้ !!",
         });
       }
-      setLoadingEditmember(true);
+      //setLoadingEditmember(true);
+      setloadingbutton(false);
     });
   };
 
   ////////////// Get Company Record by id ////////////////
   function getDatacompanyRecord() {
     let qString = "?company_id=";
-    getCompanyRecord(qString,id).then((res) => {
+    getCompanyRecord(qString, id).then((res) => {
       console.log(`getcompany-> id`, id);
       console.log(`getcompanyrecord`, res.data);
 
@@ -436,7 +459,6 @@ export default function User() {
     });
   }
 
-
   //////////////// Edit Member ////////////////
 
   const changecompanyname = () => {
@@ -446,7 +468,6 @@ export default function User() {
     values["company_name_eng"] = newEngName;
     values["company_name_eng_et"] = newShortName;
     values["last_changed_name_at"] = `${selectdate} + ${time}`;
-   
 
     postChangecom(values).then((response) => {
       console.log("postChangecom: response", response);
@@ -461,10 +482,10 @@ export default function User() {
           showConfirmButton: false,
           timer: 2000,
         });
-        
+
         getDatacompanyRecord();
         handleCloseeditcompany();
-        
+
         // window.location.pathname = "/member";
       } else {
         console.log(
@@ -559,7 +580,7 @@ export default function User() {
                 color: "#212121",
               }}
             >
-              Edit Member 
+              Edit Member
             </Typography>
           </Breadcrumbs>
         </div>
@@ -618,7 +639,6 @@ export default function User() {
                   label="ข้อมูลสมาชิก"
                   value="1"
                   style={{ fontSize: "15px" }}
-                  
                 />
                 <Tab
                   label="เปลี่ยนชื่อบริษัทประกัน"
@@ -940,15 +960,18 @@ export default function User() {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                       {loadingcomrecord ? (
-                         <TableRow>
-                          <TableCell colSpan={3}>
-                            <Box sx={{ width: "100%"  }}>
-                              <LinearProgress variant="determinate" value={progress} />
-                            </Box>
-                          </TableCell>
-                        </TableRow>
-                         ) : (companyrecord.length > 0 ? (
+                        {loadingcomrecord ? (
+                          <TableRow>
+                            <TableCell colSpan={3}>
+                              <Box sx={{ width: "100%" }}>
+                                <LinearProgress
+                                  variant="determinate"
+                                  value={progress}
+                                />
+                              </Box>
+                            </TableCell>
+                          </TableRow>
+                        ) : companyrecord.length > 0 ? (
                           companyrecord.map((row, index) => (
                             <TableRow key={index}>
                               <TableCell
@@ -962,10 +985,10 @@ export default function User() {
                                     marginLeft: "25px",
                                   }}
                                 >
-                                  {index+1}
+                                  {index + 1}
                                 </Typography>
                               </TableCell>
-  
+
                               <TableCell
                                 style={{ width: 300, padding: "10px" }}
                                 align="left"
@@ -994,20 +1017,24 @@ export default function User() {
                               </TableCell>
                             </TableRow>
                           ))
-                        ):(
+                        ) : (
                           <TableRow>
                             <TableCell colSpan={3}>
-                              <Box style={{ display: "flex", justifyContent: "center" }}>
+                              <Box
+                                style={{
+                                  display: "flex",
+                                  justifyContent: "center",
+                                }}
+                              >
                                 <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
                               </Box>
                             </TableCell>
-                          </TableRow>))}
+                          </TableRow>
+                        )}
                       </TableBody>
                     </Table>
                   </TableContainer>
                 </Box>
-
-                
               </Box>
             </TabPanel>
           </TabContext>
@@ -1024,9 +1051,9 @@ export default function User() {
                 variant="contained"
                 size="middle"
                 style={{ backgroundColor: "#32B917", marginRight: "15px" }}
-                onClick={Editmember}
+                onClick={handleOpenModal}
               >
-                <Typography fontSize={14}>Update</Typography>
+                <Typography fontSize={14}>Edit Member</Typography>
               </Button>
               <Link
                 underline="hover"
@@ -1061,8 +1088,7 @@ export default function User() {
             เปลี่ยนชื่อบริษัทประกัน
           </Typography>
           <Box>
-            
-          <Box sx={{ mt: 4,  width: 540 }}>
+            <Box sx={{ mt: 4, width: 540 }}>
               {!loadingchange ? (
                 <Box sx={{ width: "100%" }}>
                   <LinearProgress variant="determinate" value={progress} />
@@ -1111,16 +1137,16 @@ export default function User() {
                 />
               </Box>
               <Box sx={{ mt: 3, width: 220 }}>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DesktopDatePicker
-              disableFuture
-              label="Select Month and Year"
-              inputFormat="YYYY-MM-DD"
-              value={selectdate}
-              onChange={handleChangedate}
-              renderInput={(params) => <TextField {...params} />}
-            />
-          </LocalizationProvider>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DesktopDatePicker
+                    disableFuture
+                    label="Select Month and Year"
+                    inputFormat="YYYY-MM-DD"
+                    value={selectdate}
+                    onChange={handleChangedate}
+                    renderInput={(params) => <TextField {...params} />}
+                  />
+                </LocalizationProvider>
               </Box>
             </Box>
 
@@ -1131,7 +1157,7 @@ export default function User() {
                 style={{
                   backgroundColor: "#ff9800",
                   marginRight: "10px",
-                  padding:"10px"
+                  padding: "10px",
                 }}
                 onClick={changecompanyname}
               >
@@ -1146,6 +1172,54 @@ export default function User() {
                 <Typography fontSize={12}>Cancel</Typography>
               </Button>
             </Box>
+          </Box>
+        </Box>
+      </Modal>
+
+      <Modal open={openModal}>
+        <Box sx={styleModal}>
+          <Box style={{ display: "flex", justifyContent: "space-between" }}>
+            <Typography marginTop={1} variant="h5" component="h2">
+              Edit Member
+            </Typography>
+            <IconButton size="large">
+              <CloseIcon fontSize="inherit" onClick={handleCloseModal} />
+            </IconButton>
+          </Box>
+          <Typography
+            sx={{ mt: 3, color: "#616161" }}
+            fontSize={14}
+            fontWeight={300}
+          >
+            Do you want to confirm edit Member
+          </Typography>
+          <Box
+            style={{
+              display: "flex",
+              justifyContent: "end",
+              marginTop: "5rem",
+            }}
+          >
+            <LoadingButton
+              color="primary"
+              onClick={handleClickModal}
+              loading={loadingbutton}
+              loadingPosition="start"
+              startIcon={<SaveIcon />}
+              variant="contained"
+              size="large"
+            >
+              <span>Update</span>
+            </LoadingButton>
+            <Button
+              style={{ marginLeft: 12 }}
+              variant="outlined"
+              size="middle"
+              color="inherit"
+              onClick={handleCloseModal}
+            >
+              <Typography fontSize={14}>cancel</Typography>
+            </Button>
           </Box>
         </Box>
       </Modal>
