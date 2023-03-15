@@ -14,10 +14,14 @@ import Stack from "@mui/material/Stack";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { Typography, TextField, MenuItem } from "@mui/material";
-import ContentEditable from "react-contenteditable";
-import { getEditform, postEditform } from "../service";
+import {
+  getEditform,
+  postEditformA,
+  postEditformB,
+  postConfirm,
+} from "../service";
 import Swal from "sweetalert2";
-import { InputNumber, Select, Button } from "antd";
+import { InputNumber, Select } from "antd";
 import ButtonMui from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
 import IconButton from "@mui/material/IconButton";
@@ -25,48 +29,22 @@ import LoadingButton from "@mui/lab/LoadingButton";
 import CloseIcon from "@mui/icons-material/Close";
 import SaveIcon from "@mui/icons-material/Save";
 
-import "./edit.css";
-
-const FormA_One = [
-  {
-    id: "ชื่อบริษัท",
-    label: "ชื่อบริษัท",
-    align: "center",
-    width: "30rem",
-  },
-  {
-    id: "Template",
-    label: "Template",
-    align: "center",
-  },
-  {
-    id: "รหัสสมาชิก",
-    label: "รหัสสมาชิก",
-    align: "center",
-  },
-  {
-    id: "ค.ศ.",
-    label: "ค.ศ.",
-    align: "center",
-  },
-  {
-    id: "ประจำเดือน",
-    label: "ประจำเดือน",
-    align: "center",
-  },
-  {
-    id: "ประเภทข้อมูล",
-    label: "ประเภทข้อมูล",
-    align: "center",
-  },
-  {
-    id: "จำนวนรายการ",
-    label: "จำนวนรายการ",
-    align: "center",
-  },
-];
+import "./Editmonthly.css";
 
 const styleModal = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 500,
+  height: 200,
+  bgcolor: "background.paper",
+  borderRadius: 3,
+  boxShadow: 24,
+  p: 3,
+};
+
+const styleModalconfirm = {
   position: "absolute",
   top: "50%",
   left: "50%",
@@ -82,15 +60,15 @@ const styleModal = {
 export default function MonthlyEdit() {
   const [loadingdata, setLoadingdata] = useState(true);
   const [loadingbutton, setloadingbutton] = useState(false);
+  const [loadingbuttonconfirm, setloadingbuttonconfirm] = useState(false);
+
   const [status, setStatus] = useState(true);
   const [dataform, setDataform] = useState([{}]);
-  const [formvalue, setFormvalue] = useState([]);
   const [values, setValues] = useState({});
 
   ////////// Modal //////////
   const [open, setOpen] = useState(false);
-  //const [confirmLoading, setConfirmLoading] = useState(false);
-  //const [modalText, setModalText] = useState("Content of the modal");
+  const [openconfirm, setOpenconfirm] = useState(false);
 
   const [company, setCompany] = useState("0");
   const [template, setTemplate] = useState("0");
@@ -99,6 +77,7 @@ export default function MonthlyEdit() {
   const [monthy, setMonthy] = useState("0");
   const [dataType, setDataType] = useState("0");
   const [order, setOrder] = useState("0");
+  const [isConfirm, setIsConfirm] = useState(null);
 
   //////////////// Variable of Form A,B ////////////////
   const [ord1, setOrd1] = useState(0);
@@ -167,20 +146,25 @@ export default function MonthlyEdit() {
   const { id } = useParams();
 
   let temptrim = template.substring(7, 16);
-  //const demo = (7285141.123456).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,");
-  //const ord1_new = ord1.toLocaleString
+  let temptrim2 = template.substring(15, 16);
 
-  const handleOpen = () => {
-    setOpen(true);
-  };
+  // const demo = (728514).toFixed(3).replace(/\d(?=(\d{3})+\.)/g, "$&,");
+  // console.log("$ " + demo);
 
-  const handleClose = () => {
-    setOpen(false);
-  };
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
   function handleClick() {
     setloadingbutton(true);
     Editdataform();
+  }
+
+  const handleOpenconfirm = () => setOpenconfirm(true);
+  const handleCloseconfirm = () => setOpenconfirm(false);
+
+  function handleClickConfirm() {
+    setloadingbuttonconfirm(true);
+    confirmReport();
   }
 
   ////////// for get DataUser //////////
@@ -188,11 +172,39 @@ export default function MonthlyEdit() {
     getdataform();
   }, []);
 
-  //const number = 10002320;
+  //////////////// confirm Monthly report by id ////////////////
 
-  //const numbernew = new Intl.NumberFormat().format(number);
-  // const numbernew = parseFloat(number);
-  // const numbernewformate = new Intl.NumberFormat().format(ord1);
+  function confirmReport() {
+    let qString = id;
+
+    postConfirm(id, qString).then((response) => {
+      console.log("postConfirm: id", id);
+      if (response && (response.status === 200 || response.status === 201)) {
+        handleCloseconfirm();
+        Swal.fire({
+          position: "center",
+          icon: "success",
+          title: "Confirm Report เรียบร้อย!",
+          showConfirmButton: false,
+          timer: 3000,
+        });
+        window.location.pathname = `/monthly/editdata/${id}`;
+      } else {
+        console.log(
+          "API response error1 [" + response.status + "]",
+          response.data.message
+        );
+        handleCloseconfirm();
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: `ไม่สามารถ Confirm Report ได้ !! ${response.data.message}`,
+        });
+      }
+      setloadingbuttonconfirm(false);
+    });
+  }
+
   ////////////// Get form by id ////////////////
 
   function getdataform() {
@@ -208,13 +220,10 @@ export default function MonthlyEdit() {
         setMonthy(res.data[0].tag_money_month);
         setDataType(res.data[0].data_type);
         setOrder(res.data[0].item_qty);
+        setIsConfirm(res.data[0].isConfirm);
 
-        res.data[0].value_moneys.map((row, index) => {
+        res.data[0].value_moneys.map((row) => {
           if (row.ord1) {
-            //console.log(`มีค่า ord1`);
-            //setOrd1(row.ord1.toString());
-            //setOrd1(new Intl.NumberFormat().format(row.ord1));
-            //setOrd1(row.ord1.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, "$&,"));
             setOrd1(row.ord1);
           } else if (row.ord2) {
             setOrd2(row.ord2);
@@ -271,7 +280,6 @@ export default function MonthlyEdit() {
           }
         });
       }
-
       setLoadingdata(false);
     });
   }
@@ -324,34 +332,63 @@ export default function MonthlyEdit() {
     values["PAstu2"] = PAstu2;
     values["PAstu3"] = PAstu3;
 
-    postEditform(values, id).then((response) => {
-      console.log("postEdit: id", id);
-      console.log("postEdit: values", values);
+    if (temptrim == "tplPC1T2A") {
+      postEditformA(values, id).then((response) => {
+        console.log("postEdit: id", id);
+        console.log("postEdit: values", values);
 
-      if (response && (response.status === 200 || response.status === 201)) {
-        setOpen(false);
+        if (response && (response.status === 200 || response.status === 201)) {
+          setOpen(false);
 
-        Swal.fire({
-          position: "center",
-          icon: "success",
-          title: "Update data form เรียบร้อย!",
-          showConfirmButton: false,
-          timer: 1500,
-        });
-        window.location.pathname = "/monthly";
-      } else {
-        console.log(
-          "API response error1 [" + response.status + "]",
-          response.data.message
-        );
-        Swal.fire({
-          icon: "error",
-          title: "Oops...",
-          text: "ไม่สามารถ Update data form ได้ !!",
-        });
-      }
-      setloadingbutton(false);
-    });
+          Swal.fire({
+            position: "center",
+            icon: "success",
+            title: "Update data form เรียบร้อย!",
+            showConfirmButton: false,
+            timer: 1500,
+          });
+          window.location.pathname = "/monthly";
+        } else {
+          console.log(
+            "API response error1 [" + response.status + "]",
+            response.data.message
+          );
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "ไม่สามารถ Update data form ได้ !!",
+          });
+        }
+        setloadingbutton(false);
+      });
+    } else {
+      postEditformB(values, id).then((response) => {
+        console.log("postEdit: id", id);
+        console.log("postEdit: values", values);
+
+        if (response && (response.status === 200 || response.status === 201)) {
+          Swal.fire({
+            position: "center",
+            icon: "success",
+            title: "Update data form เรียบร้อย!",
+            showConfirmButton: false,
+            timer: 1500,
+          });
+          window.location.pathname = "/monthly";
+        } else {
+          console.log(
+            "API response error1 [" + response.status + "]",
+            response.data.message
+          );
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "ไม่สามารถ Update data form ได้ !!",
+          });
+        }
+        setloadingbutton(false);
+      });
+    }
   };
 
   return (
@@ -411,6 +448,24 @@ export default function MonthlyEdit() {
         >
           Edit Data
         </Typography>
+
+        <Box>
+          {loadingdata ? (
+            <Box>
+              <Skeleton variant="rounded" height={30} />
+            </Box>
+          ) : (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                padding: "8px",
+              }}
+            >
+              <Typography variant="h4">Form {temptrim2}</Typography>
+            </Box>
+          )}
+        </Box>
 
         <Box sx={{ mt: 1 }}>
           {loadingdata ? (
@@ -673,11 +728,14 @@ export default function MonthlyEdit() {
                                 value={ord1}
                                 bordered={false}
                                 disabled={status}
+                                // formatter={(value) =>
+                                //   `${value}`.replace(
+                                //     /\B(?=(\d{3})+(?!\d))/g,
+                                //     ","
+                                //   )
+                                // }
                                 formatter={(value) =>
-                                  `${value}`.replace(
-                                    /\B(?=(\d{3})+(?!\d))/g,
-                                    ","
-                                  )
+                                  new Intl.NumberFormat().format(value)
                                 }
                                 onChange={(value) => {
                                   setOrd1(value);
@@ -694,10 +752,7 @@ export default function MonthlyEdit() {
                                 bordered={false}
                                 disabled={status}
                                 formatter={(value) =>
-                                  `${value}`.replace(
-                                    /\B(?=(\d{3})+(?!\d))/g,
-                                    ","
-                                  )
+                                  new Intl.NumberFormat().format(value)
                                 }
                                 onChange={(value) => {
                                   setOrd2(value);
@@ -714,10 +769,7 @@ export default function MonthlyEdit() {
                                 bordered={false}
                                 disabled={status}
                                 formatter={(value) =>
-                                  `${value}`.replace(
-                                    /\B(?=(\d{3})+(?!\d))/g,
-                                    ","
-                                  )
+                                  new Intl.NumberFormat().format(value)
                                 }
                                 onChange={(value) => {
                                   setOrd3(value);
@@ -741,10 +793,7 @@ export default function MonthlyEdit() {
                                 bordered={false}
                                 disabled={status}
                                 formatter={(value) =>
-                                  `${value}`.replace(
-                                    /\B(?=(\d{3})+(?!\d))/g,
-                                    ","
-                                  )
+                                  new Intl.NumberFormat().format(value)
                                 }
                                 onChange={(value) => {
                                   setInd1(value);
@@ -761,10 +810,7 @@ export default function MonthlyEdit() {
                                 bordered={false}
                                 disabled={status}
                                 formatter={(value) =>
-                                  `${value}`.replace(
-                                    /\B(?=(\d{3})+(?!\d))/g,
-                                    ","
-                                  )
+                                  new Intl.NumberFormat().format(value)
                                 }
                                 onChange={(value) => {
                                   setInd2(value);
@@ -781,10 +827,7 @@ export default function MonthlyEdit() {
                                 bordered={false}
                                 disabled={status}
                                 formatter={(value) =>
-                                  `${value}`.replace(
-                                    /\B(?=(\d{3})+(?!\d))/g,
-                                    ","
-                                  )
+                                  new Intl.NumberFormat().format(value)
                                 }
                                 onChange={(value) => {
                                   setInd3(value);
@@ -830,10 +873,7 @@ export default function MonthlyEdit() {
                                 bordered={false}
                                 disabled={status}
                                 formatter={(value) =>
-                                  `${value}`.replace(
-                                    /\B(?=(\d{3})+(?!\d))/g,
-                                    ","
-                                  )
+                                  new Intl.NumberFormat().format(value)
                                 }
                                 onChange={(value) => {
                                   setTerm1(value);
@@ -850,10 +890,7 @@ export default function MonthlyEdit() {
                                 bordered={false}
                                 disabled={status}
                                 formatter={(value) =>
-                                  `${value}`.replace(
-                                    /\B(?=(\d{3})+(?!\d))/g,
-                                    ","
-                                  )
+                                  new Intl.NumberFormat().format(value)
                                 }
                                 onChange={(value) => {
                                   setTerm2(value);
@@ -870,10 +907,7 @@ export default function MonthlyEdit() {
                                 bordered={false}
                                 disabled={status}
                                 formatter={(value) =>
-                                  `${value}`.replace(
-                                    /\B(?=(\d{3})+(?!\d))/g,
-                                    ","
-                                  )
+                                  new Intl.NumberFormat().format(value)
                                 }
                                 onChange={(value) => {
                                   setTerm3(value);
@@ -898,10 +932,7 @@ export default function MonthlyEdit() {
                                 bordered={false}
                                 disabled={status}
                                 formatter={(value) =>
-                                  `${value}`.replace(
-                                    /\B(?=(\d{3})+(?!\d))/g,
-                                    ","
-                                  )
+                                  new Intl.NumberFormat().format(value)
                                 }
                                 onChange={(value) => {
                                   setEndo1(value);
@@ -918,10 +949,7 @@ export default function MonthlyEdit() {
                                 bordered={false}
                                 disabled={status}
                                 formatter={(value) =>
-                                  `${value}`.replace(
-                                    /\B(?=(\d{3})+(?!\d))/g,
-                                    ","
-                                  )
+                                  new Intl.NumberFormat().format(value)
                                 }
                                 onChange={(value) => {
                                   setEndo2(value);
@@ -938,10 +966,7 @@ export default function MonthlyEdit() {
                                 bordered={false}
                                 disabled={status}
                                 formatter={(value) =>
-                                  `${value}`.replace(
-                                    /\B(?=(\d{3})+(?!\d))/g,
-                                    ","
-                                  )
+                                  new Intl.NumberFormat().format(value)
                                 }
                                 onChange={(value) => {
                                   setEndo3(value);
@@ -966,10 +991,7 @@ export default function MonthlyEdit() {
                                 bordered={false}
                                 disabled={status}
                                 formatter={(value) =>
-                                  `${value}`.replace(
-                                    /\B(?=(\d{3})+(?!\d))/g,
-                                    ","
-                                  )
+                                  new Intl.NumberFormat().format(value)
                                 }
                                 onChange={(value) => {
                                   setMor1(value);
@@ -986,10 +1008,7 @@ export default function MonthlyEdit() {
                                 bordered={false}
                                 disabled={status}
                                 formatter={(value) =>
-                                  `${value}`.replace(
-                                    /\B(?=(\d{3})+(?!\d))/g,
-                                    ","
-                                  )
+                                  new Intl.NumberFormat().format(value)
                                 }
                                 onChange={(value) => {
                                   setMor2(value);
@@ -1006,10 +1025,7 @@ export default function MonthlyEdit() {
                                 bordered={false}
                                 disabled={status}
                                 formatter={(value) =>
-                                  `${value}`.replace(
-                                    /\B(?=(\d{3})+(?!\d))/g,
-                                    ","
-                                  )
+                                  new Intl.NumberFormat().format(value)
                                 }
                                 onChange={(value) => {
                                   setMor3(value);
@@ -1033,10 +1049,7 @@ export default function MonthlyEdit() {
                                 bordered={false}
                                 disabled={status}
                                 formatter={(value) =>
-                                  `${value}`.replace(
-                                    /\B(?=(\d{3})+(?!\d))/g,
-                                    ","
-                                  )
+                                  new Intl.NumberFormat().format(value)
                                 }
                                 onChange={(value) => {
                                   setOth1(value);
@@ -1053,10 +1066,7 @@ export default function MonthlyEdit() {
                                 bordered={false}
                                 disabled={status}
                                 formatter={(value) =>
-                                  `${value}`.replace(
-                                    /\B(?=(\d{3})+(?!\d))/g,
-                                    ","
-                                  )
+                                  new Intl.NumberFormat().format(value)
                                 }
                                 onChange={(value) => {
                                   setOth2(value);
@@ -1073,10 +1083,7 @@ export default function MonthlyEdit() {
                                 bordered={false}
                                 disabled={status}
                                 formatter={(value) =>
-                                  `${value}`.replace(
-                                    /\B(?=(\d{3})+(?!\d))/g,
-                                    ","
-                                  )
+                                  new Intl.NumberFormat().format(value)
                                 }
                                 onChange={(value) => {
                                   setOth3(value);
@@ -1100,10 +1107,7 @@ export default function MonthlyEdit() {
                                 bordered={false}
                                 disabled={status}
                                 formatter={(value) =>
-                                  `${value}`.replace(
-                                    /\B(?=(\d{3})+(?!\d))/g,
-                                    ","
-                                  )
+                                  new Intl.NumberFormat().format(value)
                                 }
                                 onChange={(value) => {
                                   setPAind1(value);
@@ -1120,10 +1124,7 @@ export default function MonthlyEdit() {
                                 bordered={false}
                                 disabled={status}
                                 formatter={(value) =>
-                                  `${value}`.replace(
-                                    /\B(?=(\d{3})+(?!\d))/g,
-                                    ","
-                                  )
+                                  new Intl.NumberFormat().format(value)
                                 }
                                 onChange={(value) => {
                                   setPAind2(value);
@@ -1140,10 +1141,7 @@ export default function MonthlyEdit() {
                                 bordered={false}
                                 disabled={status}
                                 formatter={(value) =>
-                                  `${value}`.replace(
-                                    /\B(?=(\d{3})+(?!\d))/g,
-                                    ","
-                                  )
+                                  new Intl.NumberFormat().format(value)
                                 }
                                 onChange={(value) => {
                                   setPAind3(value);
@@ -1167,10 +1165,7 @@ export default function MonthlyEdit() {
                                 bordered={false}
                                 disabled={status}
                                 formatter={(value) =>
-                                  `${value}`.replace(
-                                    /\B(?=(\d{3})+(?!\d))/g,
-                                    ","
-                                  )
+                                  new Intl.NumberFormat().format(value)
                                 }
                                 onChange={(value) => {
                                   setPAgro1(value);
@@ -1187,10 +1182,7 @@ export default function MonthlyEdit() {
                                 bordered={false}
                                 disabled={status}
                                 formatter={(value) =>
-                                  `${value}`.replace(
-                                    /\B(?=(\d{3})+(?!\d))/g,
-                                    ","
-                                  )
+                                  new Intl.NumberFormat().format(value)
                                 }
                                 onChange={(value) => {
                                   setPAgro2(value);
@@ -1207,10 +1199,7 @@ export default function MonthlyEdit() {
                                 bordered={false}
                                 disabled={status}
                                 formatter={(value) =>
-                                  `${value}`.replace(
-                                    /\B(?=(\d{3})+(?!\d))/g,
-                                    ","
-                                  )
+                                  new Intl.NumberFormat().format(value)
                                 }
                                 onChange={(value) => {
                                   setPAgro3(value);
@@ -1235,10 +1224,7 @@ export default function MonthlyEdit() {
                                 bordered={false}
                                 disabled={status}
                                 formatter={(value) =>
-                                  `${value}`.replace(
-                                    /\B(?=(\d{3})+(?!\d))/g,
-                                    ","
-                                  )
+                                  new Intl.NumberFormat().format(value)
                                 }
                                 onChange={(value) => {
                                   setPAstu1(value);
@@ -1255,10 +1241,7 @@ export default function MonthlyEdit() {
                                 bordered={false}
                                 disabled={status}
                                 formatter={(value) =>
-                                  `${value}`.replace(
-                                    /\B(?=(\d{3})+(?!\d))/g,
-                                    ","
-                                  )
+                                  new Intl.NumberFormat().format(value)
                                 }
                                 onChange={(value) => {
                                   setPAstu2(value);
@@ -1275,10 +1258,7 @@ export default function MonthlyEdit() {
                                 bordered={false}
                                 disabled={status}
                                 formatter={(value) =>
-                                  `${value}`.replace(
-                                    /\B(?=(\d{3})+(?!\d))/g,
-                                    ","
-                                  )
+                                  new Intl.NumberFormat().format(value)
                                 }
                                 onChange={(value) => {
                                   setPAstu3(value);
@@ -1327,7 +1307,7 @@ export default function MonthlyEdit() {
                       }}
                     >
                       <Typography color="primary" variant="h6">
-                        1. การรับประกันภัยรายใหม่
+                        2. เบี้ยประกันภัย (รวมของสัญญาเพิ่มเติมทุกแบบด้วย)
                       </Typography>
                       <Typography color="error" variant="h6">
                         หน่วย : พันบาท
@@ -1348,14 +1328,14 @@ export default function MonthlyEdit() {
                             <TableCell
                               rowSpan={2}
                               align="center"
-                              sx={{ width: "40rem" }}
+                              sx={{ width: "50rem" }}
                             >
                               ประเภท
                             </TableCell>
                             <TableCell
                               rowSpan={2}
                               align="center"
-                              sx={{ width: "30rem" }}
+                              sx={{ width: "20rem" }}
                             >
                               แบบเบี้ยประกันภัย {<br></br>} จ่ายครั้งเดียว
                             </TableCell>
@@ -1398,52 +1378,56 @@ export default function MonthlyEdit() {
                             <TableCell style={{ padding: "10px" }} align="left">
                               สามัญ
                             </TableCell>
-                            <TableCell align="right">
-                              <ContentEditable
-                                style={{ padding: "10px" }}
-                                id="test"
-                                html={ord1.toString()}
-                                // .toFixed(2)
-                                // .replace(/\d(?=(\d{3})+\.)/g, "$&,")
-                                //html={new Intl.NumberFormat().format(ord1)}
+                            <TableCell align="center">
+                              <InputNumber
+                                id="input"
+                                style={{
+                                  width: "95%",
+                                }}
+                                min={0}
+                                defaultValue={ord1}
+                                value={ord1}
+                                bordered={false}
                                 disabled={status}
-                                onChange={(e) => {
-                                  if (e.target.value == "") {
-                                    setOrd1(parseFloat(0));
-                                  } else {
-                                    setOrd1(parseFloat(e.target.value));
-                                  }
+                                formatter={(value) =>
+                                  new Intl.NumberFormat().format(value)
+                                }
+                                onChange={(value) => {
+                                  setOrd1(value);
                                 }}
                               />
                             </TableCell>
-                            <TableCell align="right">
-                              <ContentEditable
-                                style={{ padding: "10px" }}
-                                id="test"
-                                html={ord2.toString()}
-                                //html={new Intl.NumberFormat().format(ord2)}
+                            <TableCell align="center">
+                              <InputNumber
+                                id="input"
+                                style={{ width: "95%" }}
+                                min={0}
+                                defaultValue={ord2}
+                                value={ord2}
+                                bordered={false}
                                 disabled={status}
-                                onChange={(e) => {
-                                  if (e.target.value == "") {
-                                    setOrd2(parseFloat(0));
-                                  } else {
-                                    setOrd2(parseFloat(e.target.value));
-                                  }
+                                formatter={(value) =>
+                                  new Intl.NumberFormat().format(value)
+                                }
+                                onChange={(value) => {
+                                  setOrd2(value);
                                 }}
                               />
                             </TableCell>
-                            <TableCell align="right">
-                              <ContentEditable
-                                style={{ padding: "10px" }}
-                                id="test"
-                                html={ord3.toString()}
+                            <TableCell align="center">
+                              <InputNumber
+                                id="input"
+                                style={{ width: "95%" }}
+                                min={0}
+                                defaultValue={ord3}
+                                value={ord3}
+                                bordered={false}
                                 disabled={status}
-                                onChange={(e) => {
-                                  if (e.target.value == "") {
-                                    setOrd3(parseFloat(0));
-                                  } else {
-                                    setOrd3(parseFloat(e.target.value));
-                                  }
+                                formatter={(value) =>
+                                  new Intl.NumberFormat().format(value)
+                                }
+                                onChange={(value) => {
+                                  setOrd3(value);
                                 }}
                               />
                             </TableCell>
@@ -1459,51 +1443,56 @@ export default function MonthlyEdit() {
                             <TableCell style={{ padding: "10px" }} align="left">
                               อุตสาหกรรม
                             </TableCell>
-                            <TableCell align="right">
-                              <ContentEditable
-                                style={{ padding: "10px" }}
-                                id="test"
-                                html={ind1.toString()}
-                                //html={new Intl.NumberFormat().format(ind1)}
+                            <TableCell align="center">
+                              <InputNumber
+                                id="input"
+                                style={{
+                                  width: "95%",
+                                }}
+                                min={0}
+                                defaultValue={ind1}
+                                value={ind1}
+                                bordered={false}
                                 disabled={status}
-                                onChange={(e) => {
-                                  if (e.target.value == "") {
-                                    setInd1(parseFloat(0));
-                                  } else {
-                                    setInd1(parseFloat(e.target.value));
-                                  }
+                                formatter={(value) =>
+                                  new Intl.NumberFormat().format(value)
+                                }
+                                onChange={(value) => {
+                                  setInd1(value);
                                 }}
                               />
                             </TableCell>
-                            <TableCell align="right">
-                              <ContentEditable
-                                style={{ padding: "10px" }}
-                                id="test"
-                                html={ind2.toString()}
-                                //html={new Intl.NumberFormat().format(ind2)}
+                            <TableCell align="center">
+                              <InputNumber
+                                id="input"
+                                style={{ width: "95%" }}
+                                min={0}
+                                defaultValue={ind2}
+                                value={ind2}
+                                bordered={false}
                                 disabled={status}
-                                onChange={(e) => {
-                                  if (e.target.value == "") {
-                                    setInd2(parseFloat(0));
-                                  } else {
-                                    setInd2(parseFloat(e.target.value));
-                                  }
+                                formatter={(value) =>
+                                  new Intl.NumberFormat().format(value)
+                                }
+                                onChange={(value) => {
+                                  setInd2(value);
                                 }}
                               />
                             </TableCell>
-                            <TableCell align="right">
-                              <ContentEditable
-                                style={{ padding: "10px" }}
-                                id="test"
-                                html={ind3.toString()}
-                                //html={new Intl.NumberFormat().format(ind3)}
+                            <TableCell align="center">
+                              <InputNumber
+                                id="input"
+                                style={{ width: "95%" }}
+                                min={0}
+                                defaultValue={ind3}
+                                value={ind3}
+                                bordered={false}
                                 disabled={status}
-                                onChange={(e) => {
-                                  if (e.target.value == "") {
-                                    setInd3(parseFloat(0));
-                                  } else {
-                                    setInd3(parseFloat(e.target.value));
-                                  }
+                                formatter={(value) =>
+                                  new Intl.NumberFormat().format(value)
+                                }
+                                onChange={(value) => {
+                                  setInd3(value);
                                 }}
                               />
                             </TableCell>
@@ -1540,51 +1529,56 @@ export default function MonthlyEdit() {
                               &nbsp; &nbsp; - แบบชั่วระยะเวลา (Yearly Renewable
                               Term Insurance)
                             </TableCell>
-                            <TableCell align="right">
-                              <ContentEditable
-                                style={{ padding: "10px" }}
-                                id="test"
-                                html={term1.toString()}
-                                //html={new Intl.NumberFormat().format(term1)}
+                            <TableCell align="center">
+                              <InputNumber
+                                id="input"
+                                style={{
+                                  width: "95%",
+                                }}
+                                min={0}
+                                defaultValue={term1}
+                                value={term1}
+                                bordered={false}
                                 disabled={status}
-                                onChange={(e) => {
-                                  if (e.target.value == "") {
-                                    setTerm1(parseFloat(0));
-                                  } else {
-                                    setTerm1(parseFloat(e.target.value));
-                                  }
+                                formatter={(value) =>
+                                  new Intl.NumberFormat().format(value)
+                                }
+                                onChange={(value) => {
+                                  setTerm1(value);
                                 }}
                               />
                             </TableCell>
-                            <TableCell align="right">
-                              <ContentEditable
-                                style={{ padding: "10px" }}
-                                id="test"
-                                html={term2.toString()}
-                                //html={new Intl.NumberFormat().format(term2)}
+                            <TableCell align="center">
+                              <InputNumber
+                                id="input"
+                                style={{ width: "95%" }}
+                                min={0}
+                                defaultValue={term2}
+                                value={term2}
+                                bordered={false}
                                 disabled={status}
-                                onChange={(e) => {
-                                  if (e.target.value == "") {
-                                    setTerm2(parseFloat(0));
-                                  } else {
-                                    setTerm2(parseFloat(e.target.value));
-                                  }
+                                formatter={(value) =>
+                                  new Intl.NumberFormat().format(value)
+                                }
+                                onChange={(value) => {
+                                  setTerm2(value);
                                 }}
                               />
                             </TableCell>
-                            <TableCell align="right">
-                              <ContentEditable
-                                style={{ padding: "10px" }}
-                                id="test"
-                                html={term3.toString()}
-                                //html={new Intl.NumberFormat().format(term3)}
+                            <TableCell align="center">
+                              <InputNumber
+                                id="input"
+                                style={{ width: "95%" }}
+                                min={0}
+                                defaultValue={term3}
+                                value={term3}
+                                bordered={false}
                                 disabled={status}
-                                onChange={(e) => {
-                                  if (e.target.value == "") {
-                                    setTerm3(parseFloat(0));
-                                  } else {
-                                    setTerm3(parseFloat(e.target.value));
-                                  }
+                                formatter={(value) =>
+                                  new Intl.NumberFormat().format(value)
+                                }
+                                onChange={(value) => {
+                                  setTerm3(value);
                                 }}
                               />
                             </TableCell>
@@ -1600,51 +1594,56 @@ export default function MonthlyEdit() {
                               &nbsp; &nbsp; - แบบสะสมทรัพย์ (Endowment
                               Insurance)
                             </TableCell>
-                            <TableCell align="right">
-                              <ContentEditable
-                                style={{ padding: "10px" }}
-                                id="test"
-                                html={endo1.toString()}
-                                //html={new Intl.NumberFormat().format(endo1)}
+                            <TableCell align="center">
+                              <InputNumber
+                                id="input"
+                                style={{
+                                  width: "95%",
+                                }}
+                                min={0}
+                                defaultValue={endo1}
+                                value={endo1}
+                                bordered={false}
                                 disabled={status}
-                                onChange={(e) => {
-                                  if (e.target.value == "") {
-                                    setEndo1(parseFloat(0));
-                                  } else {
-                                    setEndo1(parseFloat(e.target.value));
-                                  }
+                                formatter={(value) =>
+                                  new Intl.NumberFormat().format(value)
+                                }
+                                onChange={(value) => {
+                                  setEndo1(value);
                                 }}
                               />
                             </TableCell>
-                            <TableCell align="right">
-                              <ContentEditable
-                                style={{ padding: "10px" }}
-                                id="test"
-                                html={endo2.toString()}
-                                //html={new Intl.NumberFormat().format(endo2)}
+                            <TableCell align="center">
+                              <InputNumber
+                                id="input"
+                                style={{ width: "95%" }}
+                                min={0}
+                                defaultValue={endo2}
+                                value={endo2}
+                                bordered={false}
                                 disabled={status}
-                                onChange={(e) => {
-                                  if (e.target.value == "") {
-                                    setEndo2(parseFloat(0));
-                                  } else {
-                                    setEndo2(parseFloat(e.target.value));
-                                  }
+                                formatter={(value) =>
+                                  new Intl.NumberFormat().format(value)
+                                }
+                                onChange={(value) => {
+                                  setEndo2(value);
                                 }}
                               />
                             </TableCell>
-                            <TableCell align="right">
-                              <ContentEditable
-                                style={{ padding: "10px" }}
-                                id="test"
-                                html={endo3.toString()}
-                                //html={new Intl.NumberFormat().format(endo3)}
+                            <TableCell align="center">
+                              <InputNumber
+                                id="input"
+                                style={{ width: "95%" }}
+                                min={0}
+                                defaultValue={endo3}
+                                value={endo3}
+                                bordered={false}
                                 disabled={status}
-                                onChange={(e) => {
-                                  if (e.target.value == "") {
-                                    setEndo3(parseFloat(0));
-                                  } else {
-                                    setEndo3(parseFloat(e.target.value));
-                                  }
+                                formatter={(value) =>
+                                  new Intl.NumberFormat().format(value)
+                                }
+                                onChange={(value) => {
+                                  setEndo3(value);
                                 }}
                               />
                             </TableCell>
@@ -1660,51 +1659,56 @@ export default function MonthlyEdit() {
                               &nbsp; &nbsp; - แบบคุ้มครองเงินกู้จำนอง (Mortgage
                               Insurance)
                             </TableCell>
-                            <TableCell align="right">
-                              <ContentEditable
-                                style={{ padding: "10px" }}
-                                id="test"
-                                html={mor1.toString()}
-                                //html={new Intl.NumberFormat().format(mor1)}
+                            <TableCell align="center">
+                              <InputNumber
+                                id="input"
+                                style={{
+                                  width: "95%",
+                                }}
+                                min={0}
+                                defaultValue={mor1}
+                                value={mor1}
+                                bordered={false}
                                 disabled={status}
-                                onChange={(e) => {
-                                  if (e.target.value == "") {
-                                    setMor1(parseFloat(0));
-                                  } else {
-                                    setMor1(parseFloat(e.target.value));
-                                  }
+                                formatter={(value) =>
+                                  new Intl.NumberFormat().format(value)
+                                }
+                                onChange={(value) => {
+                                  setMor1(value);
                                 }}
                               />
                             </TableCell>
-                            <TableCell align="right">
-                              <ContentEditable
-                                style={{ padding: "10px" }}
-                                id="test"
-                                html={mor2.toString()}
-                                //html={new Intl.NumberFormat().format(mor2)}
+                            <TableCell align="center">
+                              <InputNumber
+                                id="input"
+                                style={{ width: "95%" }}
+                                min={0}
+                                defaultValue={mor2}
+                                value={mor2}
+                                bordered={false}
                                 disabled={status}
-                                onChange={(e) => {
-                                  if (e.target.value == "") {
-                                    setMor2(parseFloat(0));
-                                  } else {
-                                    setMor2(parseFloat(e.target.value));
-                                  }
+                                formatter={(value) =>
+                                  new Intl.NumberFormat().format(value)
+                                }
+                                onChange={(value) => {
+                                  setMor2(value);
                                 }}
                               />
                             </TableCell>
-                            <TableCell align="right">
-                              <ContentEditable
-                                style={{ padding: "10px" }}
-                                id="test"
-                                html={mor3.toString()}
-                                //html={new Intl.NumberFormat().format(mor3)}
+                            <TableCell align="center">
+                              <InputNumber
+                                id="input"
+                                style={{ width: "95%" }}
+                                min={0}
+                                defaultValue={mor3}
+                                value={mor3}
+                                bordered={false}
                                 disabled={status}
-                                onChange={(e) => {
-                                  if (e.target.value == "") {
-                                    setMor3(parseFloat(0));
-                                  } else {
-                                    setMor3(parseFloat(e.target.value));
-                                  }
+                                formatter={(value) =>
+                                  new Intl.NumberFormat().format(value)
+                                }
+                                onChange={(value) => {
+                                  setMor3(value);
                                 }}
                               />
                             </TableCell>
@@ -1719,51 +1723,56 @@ export default function MonthlyEdit() {
                             <TableCell style={{ padding: "10px" }} align="left">
                               &nbsp; &nbsp; - แบบอื่น ๆ
                             </TableCell>
-                            <TableCell align="right">
-                              <ContentEditable
-                                style={{ padding: "10px" }}
-                                id="test"
-                                html={oth1.toString()}
-                                //html={new Intl.NumberFormat().format(oth1)}
+                            <TableCell align="center">
+                              <InputNumber
+                                id="input"
+                                style={{
+                                  width: "95%",
+                                }}
+                                min={0}
+                                defaultValue={oth1}
+                                value={oth1}
+                                bordered={false}
                                 disabled={status}
-                                onChange={(e) => {
-                                  if (e.target.value == "") {
-                                    setOth1(parseFloat(0));
-                                  } else {
-                                    setOth1(parseFloat(e.target.value));
-                                  }
+                                formatter={(value) =>
+                                  new Intl.NumberFormat().format(value)
+                                }
+                                onChange={(value) => {
+                                  setOth1(value);
                                 }}
                               />
                             </TableCell>
-                            <TableCell align="right">
-                              <ContentEditable
-                                style={{ padding: "10px" }}
-                                id="test"
-                                html={oth2.toString()}
-                                //html={new Intl.NumberFormat().format(oth2)}
+                            <TableCell align="center">
+                              <InputNumber
+                                id="input"
+                                style={{ width: "95%" }}
+                                min={0}
+                                defaultValue={oth2}
+                                value={oth2}
+                                bordered={false}
                                 disabled={status}
-                                onChange={(e) => {
-                                  if (e.target.value == "") {
-                                    setOth2(parseFloat(0));
-                                  } else {
-                                    setOth2(parseFloat(e.target.value));
-                                  }
+                                formatter={(value) =>
+                                  new Intl.NumberFormat().format(value)
+                                }
+                                onChange={(value) => {
+                                  setOth2(value);
                                 }}
                               />
                             </TableCell>
-                            <TableCell align="right">
-                              <ContentEditable
-                                style={{ padding: "10px" }}
-                                id="test"
-                                html={oth3.toString()}
-                                //html={new Intl.NumberFormat().format(oth3)}
+                            <TableCell align="center">
+                              <InputNumber
+                                id="input"
+                                style={{ width: "95%" }}
+                                min={0}
+                                defaultValue={oth3}
+                                value={oth3}
+                                bordered={false}
                                 disabled={status}
-                                onChange={(e) => {
-                                  if (e.target.value == "") {
-                                    setOth3(parseFloat(0));
-                                  } else {
-                                    setOth3(parseFloat(e.target.value));
-                                  }
+                                formatter={(value) =>
+                                  new Intl.NumberFormat().format(value)
+                                }
+                                onChange={(value) => {
+                                  setOth3(value);
                                 }}
                               />
                             </TableCell>
@@ -1778,51 +1787,56 @@ export default function MonthlyEdit() {
                             <TableCell style={{ padding: "10px" }} align="left">
                               สัญญาหลักประกันภัยอุบัติเหตุส่วนบุคคล
                             </TableCell>
-                            <TableCell align="right">
-                              <ContentEditable
-                                style={{ padding: "10px" }}
-                                id="test"
-                                html={PAind1.toString()}
-                                //html={new Intl.NumberFormat().format(PAind1)}
+                            <TableCell align="center">
+                              <InputNumber
+                                id="input"
+                                style={{
+                                  width: "95%",
+                                }}
+                                min={0}
+                                defaultValue={PAind1}
+                                value={PAind1}
+                                bordered={false}
                                 disabled={status}
-                                onChange={(e) => {
-                                  if (e.target.value == "") {
-                                    setPAind1(parseFloat(0));
-                                  } else {
-                                    setPAind1(parseFloat(e.target.value));
-                                  }
+                                formatter={(value) =>
+                                  new Intl.NumberFormat().format(value)
+                                }
+                                onChange={(value) => {
+                                  setPAind1(value);
                                 }}
                               />
                             </TableCell>
-                            <TableCell align="right">
-                              <ContentEditable
-                                style={{ padding: "10px" }}
-                                id="test"
-                                html={PAind2.toString()}
-                                //html={new Intl.NumberFormat().format(PAind2)}
+                            <TableCell align="center">
+                              <InputNumber
+                                id="input"
+                                style={{ width: "95%" }}
+                                min={0}
+                                defaultValue={PAind2}
+                                value={PAind2}
+                                bordered={false}
                                 disabled={status}
-                                onChange={(e) => {
-                                  if (e.target.value == "") {
-                                    setPAind2(parseFloat(0));
-                                  } else {
-                                    setPAind2(parseFloat(e.target.value));
-                                  }
+                                formatter={(value) =>
+                                  new Intl.NumberFormat().format(value)
+                                }
+                                onChange={(value) => {
+                                  setPAind2(value);
                                 }}
                               />
                             </TableCell>
-                            <TableCell align="right">
-                              <ContentEditable
-                                style={{ padding: "10px" }}
-                                id="test"
-                                html={PAind3.toString()}
-                                //html={new Intl.NumberFormat().format(PAind3)}
+                            <TableCell align="center">
+                              <InputNumber
+                                id="input"
+                                style={{ width: "95%" }}
+                                min={0}
+                                defaultValue={PAind3}
+                                value={PAind3}
+                                bordered={false}
                                 disabled={status}
-                                onChange={(e) => {
-                                  if (e.target.value == "") {
-                                    setPAind3(parseFloat(0));
-                                  } else {
-                                    setPAind3(parseFloat(e.target.value));
-                                  }
+                                formatter={(value) =>
+                                  new Intl.NumberFormat().format(value)
+                                }
+                                onChange={(value) => {
+                                  setPAind3(value);
                                 }}
                               />
                             </TableCell>
@@ -1837,51 +1851,56 @@ export default function MonthlyEdit() {
                             <TableCell style={{ padding: "10px" }} align="left">
                               สัญญาหลักประกันภัยอุบัติเหตุกลุ่ม
                             </TableCell>
-                            <TableCell align="right">
-                              <ContentEditable
-                                style={{ padding: "10px" }}
-                                id="test"
-                                html={PAgro1.toString()}
-                                //html={new Intl.NumberFormat().format(PAgro1)}
+                            <TableCell align="center">
+                              <InputNumber
+                                id="input"
+                                style={{
+                                  width: "95%",
+                                }}
+                                min={0}
+                                defaultValue={PAgro1}
+                                value={PAgro1}
+                                bordered={false}
                                 disabled={status}
-                                onChange={(e) => {
-                                  if (e.target.value == "") {
-                                    setPAgro1(parseFloat(0));
-                                  } else {
-                                    setPAgro1(parseFloat(e.target.value));
-                                  }
+                                formatter={(value) =>
+                                  new Intl.NumberFormat().format(value)
+                                }
+                                onChange={(value) => {
+                                  setPAgro1(value);
                                 }}
                               />
                             </TableCell>
-                            <TableCell align="right">
-                              <ContentEditable
-                                style={{ padding: "10px" }}
-                                id="test"
-                                html={PAgro2.toString()}
-                                //html={new Intl.NumberFormat().format(PAgro2)}
+                            <TableCell align="center">
+                              <InputNumber
+                                id="input"
+                                style={{ width: "95%" }}
+                                min={0}
+                                defaultValue={PAgro2}
+                                value={PAgro2}
+                                bordered={false}
                                 disabled={status}
-                                onChange={(e) => {
-                                  if (e.target.value == "") {
-                                    setPAgro2(parseFloat(0));
-                                  } else {
-                                    setPAgro2(parseFloat(e.target.value));
-                                  }
+                                formatter={(value) =>
+                                  new Intl.NumberFormat().format(value)
+                                }
+                                onChange={(value) => {
+                                  setPAgro2(value);
                                 }}
                               />
                             </TableCell>
-                            <TableCell align="right">
-                              <ContentEditable
-                                style={{ padding: "10px" }}
-                                id="test"
-                                html={PAgro3.toString()}
-                                //html={new Intl.NumberFormat().format(PAgro3)}
+                            <TableCell align="center">
+                              <InputNumber
+                                id="input"
+                                style={{ width: "95%" }}
+                                min={0}
+                                defaultValue={PAgro3}
+                                value={PAgro3}
+                                bordered={false}
                                 disabled={status}
-                                onChange={(e) => {
-                                  if (e.target.value == "") {
-                                    setPAgro3(parseFloat(0));
-                                  } else {
-                                    setPAgro3(parseFloat(e.target.value));
-                                  }
+                                formatter={(value) =>
+                                  new Intl.NumberFormat().format(value)
+                                }
+                                onChange={(value) => {
+                                  setPAgro3(value);
                                 }}
                               />
                             </TableCell>
@@ -1897,51 +1916,56 @@ export default function MonthlyEdit() {
                               สัญญาหลักประกันภัยอุบัติเหตุสำหรับนักเรียน นิสิต
                               และนักศึกษา
                             </TableCell>
-                            <TableCell align="right">
-                              <ContentEditable
-                                style={{ padding: "10px" }}
-                                id="test"
-                                html={PAstu1.toString()}
-                                //html={new Intl.NumberFormat().format(PAstu1)}
+                            <TableCell align="center">
+                              <InputNumber
+                                id="input"
+                                style={{
+                                  width: "95%",
+                                }}
+                                min={0}
+                                defaultValue={PAstu1}
+                                value={PAstu1}
+                                bordered={false}
                                 disabled={status}
-                                onChange={(e) => {
-                                  if (e.target.value == "") {
-                                    setPAstu1(parseFloat(0));
-                                  } else {
-                                    setPAstu1(parseFloat(e.target.value));
-                                  }
+                                formatter={(value) =>
+                                  new Intl.NumberFormat().format(value)
+                                }
+                                onChange={(value) => {
+                                  setPAstu1(value);
                                 }}
                               />
                             </TableCell>
-                            <TableCell align="right">
-                              <ContentEditable
-                                style={{ padding: "10px" }}
-                                id="test"
-                                html={PAstu2.toString()}
-                                //html={new Intl.NumberFormat().format(PAstu2)}
+                            <TableCell align="center">
+                              <InputNumber
+                                id="input"
+                                style={{ width: "95%" }}
+                                min={0}
+                                defaultValue={PAstu2}
+                                value={PAstu2}
+                                bordered={false}
                                 disabled={status}
-                                onChange={(e) => {
-                                  if (e.target.value == "") {
-                                    setPAstu2(parseFloat(0));
-                                  } else {
-                                    setPAstu2(parseFloat(e.target.value));
-                                  }
+                                formatter={(value) =>
+                                  new Intl.NumberFormat().format(value)
+                                }
+                                onChange={(value) => {
+                                  setPAstu2(value);
                                 }}
                               />
                             </TableCell>
-                            <TableCell align="right">
-                              <ContentEditable
-                                style={{ padding: "10px" }}
-                                id="test"
-                                html={PAstu3.toString()}
-                                //html={new Intl.NumberFormat().format(PAstu3)}
+                            <TableCell align="center">
+                              <InputNumber
+                                id="input"
+                                style={{ width: "95%" }}
+                                min={0}
+                                defaultValue={PAstu3}
+                                value={PAstu3}
+                                bordered={false}
                                 disabled={status}
-                                onChange={(e) => {
-                                  if (e.target.value == "") {
-                                    setPAstu3(parseFloat(0));
-                                  } else {
-                                    setPAstu3(parseFloat(e.target.value));
-                                  }
+                                formatter={(value) =>
+                                  new Intl.NumberFormat().format(value)
+                                }
+                                onChange={(value) => {
+                                  setPAstu3(value);
                                 }}
                               />
                             </TableCell>
@@ -2038,9 +2062,11 @@ export default function MonthlyEdit() {
           )}
           <ButtonMui
             variant="contained"
+            color="success"
             size="middle"
-            style={{ backgroundColor: "#32B917", marginRight: "15px" }}
-            //onClick={Editdataform}
+            disabled={isConfirm === 0 ? false : true}
+            style={{ marginRight: "15px" }}
+            onClick={handleOpenconfirm}
           >
             <Typography fontSize={14}>Confirm</Typography>
           </ButtonMui>
@@ -2096,6 +2122,56 @@ export default function MonthlyEdit() {
               size="middle"
               color="inherit"
               onClick={handleClose}
+            >
+              <Typography fontSize={14}>cancel</Typography>
+            </ButtonMui>
+          </Box>
+        </Box>
+      </Modal>
+
+      {/* Confirm Report */}
+
+      <Modal open={openconfirm} onClose={handleCloseconfirm}>
+        <Box sx={styleModalconfirm}>
+          <Box style={{ display: "flex", justifyContent: "space-between" }}>
+            <Typography marginTop={1} variant="h4" component="h2">
+              Confirm Report
+            </Typography>
+            <IconButton size="large">
+              <CloseIcon fontSize="inherit" onClick={handleCloseconfirm} />
+            </IconButton>
+          </Box>
+          <Typography
+            sx={{ mt: 3, color: "#616161" }}
+            fontSize={16}
+            fontWeight={300}
+          >
+            Do you want to confirm report
+          </Typography>
+          <Box
+            style={{
+              display: "flex",
+              justifyContent: "end",
+              marginTop: "5rem",
+            }}
+          >
+            <LoadingButton
+              color="primary"
+              onClick={handleClickConfirm}
+              loading={loadingbuttonconfirm}
+              loadingPosition="start"
+              startIcon={<SaveIcon />}
+              variant="contained"
+              size="large"
+            >
+              <span>confirm</span>
+            </LoadingButton>
+            <ButtonMui
+              style={{ marginLeft: 12 }}
+              variant="outlined"
+              size="middle"
+              color="inherit"
+              onClick={handleCloseconfirm}
             >
               <Typography fontSize={14}>cancel</Typography>
             </ButtonMui>

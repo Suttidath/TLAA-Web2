@@ -1,363 +1,92 @@
 import * as React from "react";
-import PropTypes from "prop-types";
-import { useTheme } from "@mui/material/styles";
-import { Link } from "react-router-dom";
 import Box from "@mui/material/Box";
-import Table from "@mui/material/Table";
-import TableHead from "@mui/material/TableHead";
-import TableBody from "@mui/material/TableBody";
-import TableCell from "@mui/material/TableCell";
-import TableContainer from "@mui/material/TableContainer";
-import TableFooter from "@mui/material/TableFooter";
-import TablePagination from "@mui/material/TablePagination";
-import TableRow from "@mui/material/TableRow";
+import { Typography, Grid } from "@mui/material";
+import { experimentalStyled as styled } from "@mui/material/styles";
 import Paper from "@mui/material/Paper";
-import IconButton from "@mui/material/IconButton";
-import FirstPageIcon from "@mui/icons-material/FirstPage";
-import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
-import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
-import LastPageIcon from "@mui/icons-material/LastPage";
-import { Typography, TextField, Button, MenuItem } from "@mui/material";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
-import InputAdornment from "@mui/material/InputAdornment";
-import SearchIcon from "@mui/icons-material/Search";
-import { FiEdit } from "react-icons/fi";
-import { BsFillXCircleFill } from "react-icons/bs";
+import ArrowDropDownSharpIcon from "@mui/icons-material/ArrowDropDownSharp";
+import CardNewInsurance from "../components/CardNewInsurance";
+import CardRenewalinsurance from "../components/CardRenewalinsurance";
+import ArrowDropUpIcon from "@mui/icons-material/ArrowDropUp";
+import Overview1 from "../img/overview1.png";
+import Overview2 from "../img/overview2.png";
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+} from "chart.js";
+import { Bar, Pie } from "react-chartjs-2";
 
-function TablePaginationActions(props) {
-  const theme = useTheme();
-  const { count, page, rowsPerPage, onPageChange } = props;
+ChartJS.register(
+  ArcElement,
+  BarElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale
+);
 
-  const handleFirstPageButtonClick = (event) => {
-    onPageChange(event, 0);
-  };
-
-  const handleBackButtonClick = (event) => {
-    onPageChange(event, page - 1);
-  };
-
-  const handleNextButtonClick = (event) => {
-    onPageChange(event, page + 1);
-  };
-
-  const handleLastPageButtonClick = (event) => {
-    onPageChange(event, Math.max(0, Math.ceil(count / rowsPerPage) - 1));
-  };
-
-  return (
-    <Box
-      sx={{
-        flexShrink: 0,
-        ml: 2.5,
-        // "& .MuiTablePagination-selectLabel": {
-        //   fontSize: "1.15 rem",
-        // },
-      }}
-    >
-      <IconButton
-        onClick={handleFirstPageButtonClick}
-        disabled={page === 0}
-        aria-label="first page"
-      >
-        {theme.direction === "rtl" ? <LastPageIcon /> : <FirstPageIcon />}
-      </IconButton>
-      <IconButton
-        onClick={handleBackButtonClick}
-        disabled={page === 0}
-        aria-label="previous page"
-      >
-        {theme.direction === "rtl" ? (
-          <KeyboardArrowRight />
-        ) : (
-          <KeyboardArrowLeft />
-        )}
-      </IconButton>
-      <IconButton
-        onClick={handleNextButtonClick}
-        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
-        aria-label="next page"
-      >
-        {theme.direction === "rtl" ? (
-          <KeyboardArrowLeft />
-        ) : (
-          <KeyboardArrowRight />
-        )}
-      </IconButton>
-      <IconButton
-        onClick={handleLastPageButtonClick}
-        disabled={page >= Math.ceil(count / rowsPerPage) - 1}
-        aria-label="last page"
-      >
-        {theme.direction === "rtl" ? <FirstPageIcon /> : <LastPageIcon />}
-      </IconButton>
-    </Box>
-  );
-}
-
-TablePaginationActions.propTypes = {
-  count: PropTypes.number.isRequired,
-  onPageChange: PropTypes.func.isRequired,
-  page: PropTypes.number.isRequired,
-  rowsPerPage: PropTypes.number.isRequired,
+export const data = {
+  labels: ["เบี้ยฯ ปีแรก", "เบี้ยฯ ต่ออายุ", "เบี้ยฯ จ่ายครั้งเดียว"],
+  datasets: [
+    {
+      label: "# of Votes",
+      data: [16390.93, 70971.01, 8821.21],
+      backgroundColor: [
+        "rgba(255, 99, 132, 1)",
+        "rgba(54, 162, 235, 1)",
+        "rgba(255, 206, 86, 1)",
+      ],
+      borderWidth: 1,
+    },
+  ],
 };
 
-function createData(name, calories, fat, form, status, date, time) {
-  return { name, calories, fat, form, status, date, time };
-}
+export const options = {
+  responsive: true,
+  plugins: {
+    legend: {
+      position: "top",
+    },
+    title: {
+      display: true,
+      text: "Chart.js Bar Chart",
+    },
+  },
+};
 
-const rows = [
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "A",
-    "Wait to confirm",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "B",
-    "Confirm",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "A",
-    "Confirm",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "B",
-    "Confirm",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "A",
-    "Confirm",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "B",
-    "Confirm",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2019,
-    "A",
-    "Confirm",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "B",
-    "Confirm",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "A",
-    "Confirm",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2021,
-    "B",
-    "Wait to confirm",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "A",
-    "Confirm",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "B",
-    "Confirm",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "A",
-    "Wait to confirm",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-].sort((a, b) => (a.calories < b.calories ? -1 : 1));
+//const labels = ["เบี้ยฯ ปีแรก", "เบี้ยฯ ต่ออายุ", "เบี้ยฯ จ่ายครั้งเดียว"]
 
-const columns = [
-  {
-    id: "Insurance",
-    label: "Insurance Company",
-    align: "left",
-  },
-  {
-    id: "Month",
-    label: "Month",
-    align: "left",
-  },
-  {
-    id: "Year",
-    label: "Year",
-    align: "left",
-  },
-  {
-    id: "Form",
-    label: "Form",
-    align: "left",
-  },
-  {
-    id: "Status",
-    label: "Status",
-    align: "left",
-  },
-  {
-    id: "Action",
-    label: "Action",
-    align: "left",
-  },
-];
-
-const months = [
-  {
-    value: "Jan",
-    label: "January",
-  },
-  {
-    value: "Feb",
-    label: "Febuary",
-  },
-  {
-    value: "Sep",
-    label: "September",
-  },
-  {
-    value: "Oct",
-    label: "October",
-  },
-];
-
-const years = [
-  {
-    value: "2022",
-    label: "2022",
-  },
-  {
-    value: "2021",
-    label: "2021",
-  },
-  {
-    value: "2020",
-    label: "2020",
-  },
-  {
-    value: "2019",
-    label: "2019",
-  },
-];
-
-const forms = [
-  {
-    value: "A",
-    label: "A",
-  },
-  {
-    value: "B",
-    label: "B",
-  },
-];
-
-const statuses = [
-  {
-    value: "Confirm",
-    label: "Confirm",
-  },
-  {
-    value: "Wait to confirm",
-    label: "Wait to confirm",
-  },
-];
+export const data2 = {
+  labels: ["เบี้ยฯ ปีแรก", "เบี้ยฯ ต่ออายุ", "เบี้ยฯ จ่ายครั้งเดียว"],
+  datasets: [
+    {
+      label: "Ordinary",
+      data: [1375.54, 6241.99, 3063.96],
+      backgroundColor: "#0d47a1",
+    },
+    {
+      label: "Industrial",
+      data: [38.75, 787.49, 8821.21],
+      backgroundColor: "#40c4ff",
+    },
+    {
+      label: "Group",
+      data: [263.08, 718.95, 5757.241],
+      backgroundColor: "#673ab7",
+    },
+    {
+      label: "PA",
+      data: [713.57, 122.55, 8821.21],
+      backgroundColor: "#ff9100",
+    },
+  ],
+};
 
 export default function Overview() {
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
-
-  const [companyname, setCompanyname] = React.useState("");
-  const [month, setMonth] = React.useState("");
-  const [year, setYear] = React.useState("");
-  const [form, setForm] = React.useState("");
-  const [status, setStatus] = React.useState("");
-
-  //////////////// setting RowsPerPage ////////////////
-  const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
-
-  //////////////// DropDown Box ////////////////
-  const handleChangemonth = (event) => {
-    setMonth(event.target.value);
-  };
-
-  const handleChangeyear = (event) => {
-    setYear(event.target.value);
-  };
-
-  const handleChangeform = (event) => {
-    setForm(event.target.value);
-  };
-
-  const handleChangestatus = (event) => {
-    setStatus(event.target.value);
-  };
-
   return (
     <Box
       style={{
@@ -378,6 +107,243 @@ export default function Overview() {
         >
           Overview
         </Typography>
+
+        <Typography
+          sx={{
+            mt: 3,
+            fontWeight: "400",
+            color: "#1565c0",
+            fontSize: "1.7rem",
+          }}
+        >
+          ภาพรวมเบี้ยประกันชีวิต ปี 2565
+        </Typography>
+
+        <Box
+          sx={{
+            mt: 4,
+            ml: 8,
+            mr: 8,
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <Box sx={{ display: "flex", justifyContent: "end", mb: 3 }}>
+            <Typography variant="h6">หน่วย : ล้านบาท</Typography>
+          </Box>
+
+          <Box sx={{ display: "flex", gap: 3 }}>
+            <Paper
+              elevation={1}
+              // variant="outlined"
+              sx={{
+                width: "33%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Box sx={{ textAlign: "center" }}>
+                <Typography fontSize={34}>เบี้ยฯ รับรวม</Typography>
+                <Typography fontSize={38}>611,374</Typography>
+                <Box sx={{ display: "flex", justifyContent: "center" }}>
+                  <Typography fontSize={44} color="#d50000">
+                    <ArrowDropDownSharpIcon fontSize="30px" />
+                  </Typography>
+                  <Typography fontSize={38} color="#d50000">
+                    -0.45%
+                  </Typography>
+                </Box>
+              </Box>
+            </Paper>
+            <Paper elevation={0} sx={{ width: "33%" }}>
+              <Paper
+                elevation={0}
+                sx={{ display: "flex", flexDirection: "column" }}
+              >
+                <Box sx={{ display: "flex" }}>
+                  <Box
+                    sx={{
+                      width: "30%",
+                      display: "flex",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <img
+                      alt="Logo1"
+                      src={Overview1}
+                      style={{ width: "10rem", height: "7.5rem" }}
+                    />
+                  </Box>
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                    }}
+                  >
+                    <Typography fontSize={26}>เบี้ยฯ รายใหม่</Typography>
+                    <Typography fontSize={24} color="#1976d2">
+                      169,878
+                    </Typography>
+                    <Box sx={{ display: "flex" }}>
+                      <Typography fontSize={32} color="#d50000">
+                        <ArrowDropDownSharpIcon fontSize="30px" />
+                      </Typography>
+                      <Typography fontSize={21} color="#d50000">
+                        -0.49%
+                      </Typography>
+                      &nbsp;&nbsp;&nbsp;&nbsp;
+                      <Typography fontSize={21}>Share 27.79%</Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              </Paper>
+
+              <Box sx={{ display: "flex", mt: 1, width: "100%", gap: 2 }}>
+                <Paper variant="outlined" sx={{ p: 2, width: "50%" }}>
+                  <Typography fontSize={20}>เบี้ยฯ ปีแรก</Typography>
+                  <Typography fontSize={20} color="#1976d2">
+                    105,192
+                  </Typography>
+                  <Box sx={{ display: "flex" }}>
+                    <Typography fontSize={24} color="#4caf50">
+                      <ArrowDropUpIcon fontSize="30px" />
+                    </Typography>
+                    <Typography fontSize={18} color="#4caf50">
+                      10.42%
+                    </Typography>
+                  </Box>
+                  <Typography fontSize={18}>Share 17.21%</Typography>
+                </Paper>
+                <Paper
+                  variant="outlined"
+                  sx={{
+                    p: 2,
+                    width: "50%",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Typography fontSize={20}>เบี้ยฯ จ่ายครั้งเดียว</Typography>
+                  <Typography fontSize={20} color="#1976d2">
+                    64,686
+                  </Typography>
+                  <Box sx={{ display: "flex" }}>
+                    <Typography fontSize={24} color="#d50000">
+                      <ArrowDropDownSharpIcon fontSize="30px" />
+                    </Typography>
+                    <Typography fontSize={18} color="#d50000">
+                      -14.27%
+                    </Typography>
+                  </Box>
+                  <Typography fontSize={18}>Share 10.58%</Typography>
+                </Paper>
+              </Box>
+            </Paper>
+            <Paper elevation={0} sx={{ width: "33%" }}>
+              <Paper
+                elevation={0}
+                sx={{ display: "flex", flexDirection: "column" }}
+              >
+                <Box sx={{ display: "flex" }}>
+                  <Box
+                    sx={{
+                      width: "30%",
+                      display: "flex",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <img
+                      alt="Logo1"
+                      src={Overview2}
+                      style={{ width: "6rem", height: "7.5rem" }}
+                    />
+                  </Box>
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                    }}
+                  >
+                    <Typography fontSize={26}>เบี้ยฯ ต่ออายุ</Typography>
+                    <Typography fontSize={24} color="#1976d2">
+                      441,496
+                    </Typography>
+                    <Box sx={{ display: "flex" }}>
+                      <Typography fontSize={32} color="#d50000">
+                        <ArrowDropDownSharpIcon fontSize="30px" />
+                      </Typography>
+                      <Typography fontSize={21} color="#d50000">
+                        -0.43%
+                      </Typography>
+                      &nbsp;&nbsp;&nbsp;&nbsp;
+                      <Typography fontSize={21}>Share 72.21%</Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              </Paper>
+
+              <Paper
+                variant="outlined"
+                sx={{
+                  p: 5.5,
+                  mt: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  textAlign: "center",
+                }}
+              >
+                <Typography fontSize={22}>
+                  อัตตราความคงอยู่ของกรมธรรม์
+                </Typography>
+                <Typography fontSize={22} color="#1976d2">
+                  82%
+                </Typography>
+              </Paper>
+            </Paper>
+          </Box>
+
+          <Box
+            sx={{
+              display: "flex",
+              width: "100%",
+              marginTop: 9,
+              marginBottom: 7,
+            }}
+          >
+            <Box
+              sx={{
+                width: "40%",
+                height: "350px",
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <Pie
+                data={data}
+                style={{
+                  padding: "10px",
+                }}
+              />
+              ;
+            </Box>
+            <Box
+              sx={{
+                width: "60%",
+                height: "350px",
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <Bar options={options} data={data2} />
+            </Box>
+          </Box>
+        </Box>
       </Box>
     </Box>
   );

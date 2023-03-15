@@ -262,6 +262,11 @@ const rows = [
 ].sort((a, b) => (a.calories < b.calories ? -1 : 1));
 
 const columns = [
+  // {
+  //   id: "ลำดับ",
+  //   label: "ลำดับ",
+  //   align: "center",
+  // },
   {
     id: "ชื่อบริษัทประกัน",
     label: "ชื่อบริษัทประกัน",
@@ -603,6 +608,16 @@ export default function Member() {
                 : dataMember
               ).map((row, index) => (
                 <TableRow key={index}>
+                  {/* <TableCell
+                    style={{ width: 80, padding: "10px" }}
+                    align="center"
+                  >
+                    <Typography
+                      style={{ fontSize: "1.12rem", fontWeight: "400" }}
+                    >
+                      {index + 1}
+                    </Typography>
+                  </TableCell> */}
                   <TableCell
                     style={{ width: 500, padding: "10px" }}
                     align="left"

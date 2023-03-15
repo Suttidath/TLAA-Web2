@@ -60,6 +60,8 @@ import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 import LoadingButton from "@mui/lab/LoadingButton";
 import CloseIcon from "@mui/icons-material/Close";
 import SaveIcon from "@mui/icons-material/Save";
+import MaskedInput from "react-text-mask";
+import NumericInput from "material-ui-numeric-input";
 
 const styleModal = {
   position: "absolute",
@@ -79,10 +81,9 @@ const style2 = {
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  // width: 550,
-  // height: 220,
   bgcolor: "background.paper",
   boxShadow: 16,
+  borderRadius: 2,
   p: 5,
 };
 
@@ -160,84 +161,6 @@ TablePaginationActions.propTypes = {
   rowsPerPage: PropTypes.number.isRequired,
 };
 
-function createData(name, calories, fat, form, status, company, role) {
-  return { name, calories, fat, form, status, company, role };
-}
-
-const columns = [
-  {
-    id: "ชื่อผู้ใช้งานระบบ",
-    label: "ชื่อผู้ใช้งานระบบ",
-    align: "left",
-  },
-  {
-    id: "บริษัท",
-    label: "บริษัท",
-    align: "left",
-  },
-  {
-    id: "Role",
-    label: "Role",
-    align: "left",
-  },
-
-  {
-    id: "Status",
-    label: "Status",
-    align: "left",
-  },
-  {
-    id: "Action",
-    label: "Action",
-    align: "left",
-  },
-];
-
-const statuses = [
-  {
-    id: "1",
-    value: "Active",
-    label: "Active",
-  },
-  {
-    id: "0",
-    value: "Inactive",
-    label: "Inactive",
-  },
-];
-
-const Roles = [
-  {
-    id: "1",
-    value: "Admin",
-    label: "Admin",
-  },
-  {
-    id: "0",
-    value: "User",
-    label: "User",
-  },
-];
-
-const datachangecomp = [
-  {
-    id: "1",
-    compname: "บริษัทประกัน A",
-    datechange: "10-02-2022",
-  },
-
-  {
-    id: "2",
-    compname: "บริษัทประกัน B",
-    datechange: "16-06-2022",
-  },
-  {
-    id: "3",
-    compname: "บริษัทประกัน C",
-    datechange: "01-12-2022",
-  },
-];
-
 const changecomp = [
   {
     id: "1",
@@ -275,12 +198,14 @@ export default function User() {
   const [address2, setAddress2] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [fax, setFax] = React.useState("");
-  const [tax, setTax] = React.useState("");
+  const [tax, setTax] = React.useState(null);
 
-  // const [company, setCompany] = React.useState("");
-  // const [firstName, setFirstName] = React.useState("");
-  // const [lastName, setLastName] = React.useState("");
-  // const [password, setPassword] = React.useState("");
+  const [errTextTname, setErrTextTname] = React.useState("");
+  const [errTname, setErrTname] = React.useState(false);
+  const [errTextEname, setErrTextEname] = React.useState("");
+  const [errEname, setErrEname] = React.useState(false);
+  const [errTextEetname, setErrTextEetname] = React.useState("");
+  const [errEetname, setErrEetname] = React.useState(false);
 
   const [checked, setChecked] = React.useState(true);
   const [progress, setProgress] = React.useState(0);
@@ -471,7 +396,6 @@ export default function User() {
 
     postChangecom(values).then((response) => {
       console.log("postChangecom: response", response);
-      // console.log("postChangecom: id", id);
       console.log("postChangecom: values", values);
 
       if (response && (response.status === 200 || response.status === 201)) {
@@ -482,11 +406,8 @@ export default function User() {
           showConfirmButton: false,
           timer: 2000,
         });
-
         getDatacompanyRecord();
         handleCloseeditcompany();
-
-        // window.location.pathname = "/member";
       } else {
         console.log(
           "API response error1 [" + response.status + "]",
@@ -501,49 +422,6 @@ export default function User() {
       setLoadingChange(true);
     });
   };
-
-  // const Addmember = () => {
-  //   setLoading(false);
-
-  //   values["company_name"] = thaiName;
-  //   values["company_name_eng"] = engName;
-  //   values["company_name_eng_et"] = engEtName;
-  //   values["company_code"] = companyCode;
-  //   values["phone"] = phone;
-  //   values["address1"] = address1;
-  //   values["email"] = email;
-  //   values["address2"] = address2;
-  //   values["fax"] = fax;
-  //   values["tax_number"] = tax;
-  //   values["isActive"] = "1";
-
-  //   postAddmember(values).then((response) => {
-  //     console.log("postAdduser: response", response);
-  //     console.log("postAdduser: values", values);
-
-  //     if (response && (response.status === 200 || response.status === 201)) {
-  //       Swal.fire({
-  //         position: "center",
-  //         icon: "success",
-  //         title: "เพิ่ม Member เรียบร้อย!",
-  //         showConfirmButton: false,
-  //         timer: 2000,
-  //       });
-  //       window.location.pathname = "/member";
-  //     } else {
-  //       console.log(
-  //         "API response error1 [" + response.status + "]",
-  //         response.data.message
-  //       );
-  //       Swal.fire({
-  //         icon: "error",
-  //         title: "Oops...",
-  //         text: "ไม่สามารถเพิ่ม Member ได้ !!",
-  //       });
-  //     }
-  //     setLoading(true);
-  //   });
-  // };
 
   return (
     <Box
@@ -622,7 +500,7 @@ export default function User() {
         <Box
           sx={{
             mt: 2,
-            width: "75%",
+            width: "65%",
             typography: "body1",
             display: "flex",
             flexDirection: "column",
@@ -658,51 +536,51 @@ export default function User() {
                   }}
                 >
                   <Box sx={{ display: "flex" }}>
-                    <Box sx={{ width: 400, mr: 4 }}>
-                      <Skeleton variant="rounded" width={400} height={45} />
+                    <Box sx={{ width: 450, mr: 4 }}>
+                      <Skeleton variant="rounded" width={450} height={45} />
                     </Box>
-                    <Box sx={{ width: 400 }}>
-                      <Skeleton variant="rounded" width={400} height={45} />
-                    </Box>
-                  </Box>
-
-                  <Box sx={{ mt: 2, display: "flex" }}>
-                    <Box sx={{ width: 400, mr: 4 }}>
-                      <Skeleton variant="rounded" width={400} height={45} />
-                    </Box>
-                    <Box sx={{ width: 400 }}>
-                      <Skeleton variant="rounded" width={400} height={45} />
+                    <Box sx={{ width: 450 }}>
+                      <Skeleton variant="rounded" width={450} height={45} />
                     </Box>
                   </Box>
 
                   <Box sx={{ mt: 2, display: "flex" }}>
-                    <Box sx={{ width: 400, mr: 4 }}>
-                      <Skeleton variant="rounded" width={400} height={45} />
+                    <Box sx={{ width: 450, mr: 4 }}>
+                      <Skeleton variant="rounded" width={450} height={45} />
                     </Box>
-                    <Box sx={{ width: 400 }}>
-                      <Skeleton variant="rounded" width={400} height={45} />
+                    <Box sx={{ width: 450 }}>
+                      <Skeleton variant="rounded" width={450} height={45} />
+                    </Box>
+                  </Box>
+
+                  <Box sx={{ mt: 2, display: "flex" }}>
+                    <Box sx={{ width: 450, mr: 4 }}>
+                      <Skeleton variant="rounded" width={450} height={45} />
+                    </Box>
+                    <Box sx={{ width: 450 }}>
+                      <Skeleton variant="rounded" width={450} height={45} />
                     </Box>
                   </Box>
                   <Box sx={{ mt: 2, display: "flex" }}>
-                    <Box sx={{ width: 400, mr: 4 }}>
-                      <Skeleton variant="rounded" width={400} height={45} />
+                    <Box sx={{ width: 450, mr: 4 }}>
+                      <Skeleton variant="rounded" width={450} height={45} />
                     </Box>
-                    <Box sx={{ width: 400 }}>
-                      <Skeleton variant="rounded" width={400} height={45} />
+                    <Box sx={{ width: 450 }}>
+                      <Skeleton variant="rounded" width={450} height={45} />
                     </Box>
                   </Box>
                   <Box sx={{ mt: 2, display: "flex" }}>
-                    <Box sx={{ width: 400, mr: 4 }}>
-                      <Skeleton variant="rounded" width={400} height={45} />
+                    <Box sx={{ width: 450, mr: 4 }}>
+                      <Skeleton variant="rounded" width={450} height={45} />
                     </Box>
-                    <Box sx={{ width: 400 }}>
-                      <Skeleton variant="rounded" width={400} height={45} />
+                    <Box sx={{ width: 450 }}>
+                      <Skeleton variant="rounded" width={450} height={45} />
                     </Box>
                   </Box>
                   <Box
                     sx={{
                       mt: 3,
-                      width: 400,
+                      width: 450,
                     }}
                   >
                     <Box>
@@ -726,22 +604,19 @@ export default function User() {
                   }}
                 >
                   <Box sx={{ display: "flex" }}>
-                    <Box sx={{ width: 400, mr: 4 }}>
+                    <Box sx={{ width: 450, mr: 4 }}>
                       <TextField
                         label="Insurance Thai Name"
                         variant="outlined"
                         size="middle"
                         fullWidth
                         value={thaiName == null ? "" : thaiName}
-                        // onChange={(e) => {
-                        //   setThaiName(e.target.value);
-                        // }}
                         InputProps={{
                           readOnly: true,
                         }}
                       />
                     </Box>
-                    <Box sx={{ width: 400 }}>
+                    <Box sx={{ width: 450 }}>
                       <TextField
                         label="Insurance English Name"
                         variant="outlined"
@@ -749,9 +624,6 @@ export default function User() {
                         readOnly
                         fullWidth
                         value={engName == null ? "" : engName}
-                        // onChange={(e) => {
-                        //   setEngName(e.target.value);
-                        // }}
                         InputProps={{
                           readOnly: true,
                         }}
@@ -760,7 +632,7 @@ export default function User() {
                   </Box>
 
                   <Box sx={{ mt: 2, display: "flex" }}>
-                    <Box sx={{ width: 400, mr: 4 }}>
+                    <Box sx={{ width: 450, mr: 4 }}>
                       <TextField
                         label="Insurance Shorten Name "
                         variant="outlined"
@@ -768,30 +640,30 @@ export default function User() {
                         fullWidth
                         readOnly
                         value={engEtName == null ? "" : engEtName}
-                        // onChange={(e) => {
-                        //   setengEtName(e.target.value);
-                        // }}
                         InputProps={{
                           readOnly: true,
                         }}
                       />
                     </Box>
-                    <Box sx={{ width: 400 }}>
+                    <Box sx={{ width: 450 }}>
                       <TextField
                         label="Insurance Code"
                         variant="outlined"
                         size="middle"
                         fullWidth
                         value={companyCode == null ? "" : companyCode}
-                        onChange={(e) => {
-                          setCompanyCode(e.target.value);
+                        InputProps={{
+                          readOnly: true,
                         }}
+                        // onChange={(e) => {
+                        //   setCompanyCode(e.target.value);
+                        // }}
                       />
                     </Box>
                   </Box>
 
                   <Box sx={{ mt: 2, display: "flex" }}>
-                    <Box sx={{ width: 400, mr: 4 }}>
+                    <Box sx={{ width: 450, mr: 4 }}>
                       <TextField
                         label="Address1"
                         variant="outlined"
@@ -803,7 +675,7 @@ export default function User() {
                         }}
                       />
                     </Box>
-                    <Box sx={{ width: 400 }}>
+                    <Box sx={{ width: 450 }}>
                       <TextField
                         label="Email"
                         variant="outlined"
@@ -817,7 +689,7 @@ export default function User() {
                     </Box>
                   </Box>
                   <Box sx={{ mt: 2, display: "flex" }}>
-                    <Box sx={{ width: 400, mr: 4 }}>
+                    <Box sx={{ width: 450, mr: 4 }}>
                       <TextField
                         label="Address2"
                         variant="outlined"
@@ -829,23 +701,82 @@ export default function User() {
                         }}
                       />
                     </Box>
-                    <Box sx={{ width: 400 }}>
-                      <TextField
-                        label="Phone Number"
-                        variant="outlined"
-                        size="middle"
-                        fullWidth
-                        value={phone == null ? "" : phone}
+                    <Box sx={{ width: 450, mr: 4 }}>
+                      <MaskedInput
+                        guide={true}
+                        mask={[
+                          /\d/,
+                          /\d/,
+                          /\d/,
+                          "-",
+                          /\d/,
+                          /\d/,
+                          /\d/,
+                          "-",
+                          /\d/,
+                          /\d/,
+                          /\d/,
+                          /\d/,
+                        ]}
                         onChange={(e) => {
                           setPhone(e.target.value);
+                          console.log(e.target.value);
                         }}
+                        render={(ref, props) => (
+                          <TextField
+                            fullWidth
+                            inputMode="numeric"
+                            inputProps={{ inputMode: "numeric" }}
+                            inputRef={ref}
+                            label="Phone Number"
+                            placeholder="0XX-XXX-XXXX"
+                            variant="outlined"
+                            {...props}
+                          />
+                        )}
+                        showMask={false}
+                        value={phone}
                       />
                     </Box>
                   </Box>
 
                   <Box sx={{ mt: 2, display: "flex" }}>
-                    <Box sx={{ width: 400, mr: 4 }}>
-                      <TextField
+                    <Box sx={{ width: 450, mr: 4 }}>
+                      <MaskedInput
+                        guide={true}
+                        mask={[
+                          /\d/,
+                          /\d/,
+                          /\d/,
+                          "-",
+                          /\d/,
+                          /\d/,
+                          /\d/,
+                          "-",
+                          /\d/,
+                          /\d/,
+                          /\d/,
+                          /\d/,
+                        ]}
+                        render={(ref, props) => (
+                          <TextField
+                            fullWidth
+                            label="Fax No."
+                            variant="outlined"
+                            inputMode="numeric"
+                            inputProps={{ inputMode: "numeric" }}
+                            placeholder="XXX-XXX-XXXX"
+                            inputRef={ref}
+                            {...props}
+                          />
+                        )}
+                        showMask={false}
+                        value={fax == null ? "" : fax}
+                        onChange={(e) => {
+                          setFax(e.target.value);
+                        }}
+                      />
+                      {/* <TextField
                         label="Fax No."
                         variant="outlined"
                         size="middle"
@@ -854,15 +785,16 @@ export default function User() {
                         onChange={(e) => {
                           setFax(e.target.value);
                         }}
-                      />
+                      /> */}
                     </Box>
-                    <Box sx={{ width: 400 }}>
+                    <Box sx={{ width: 450 }}>
                       <TextField
                         label="Tax No."
                         variant="outlined"
                         size="middle"
+                        type="number"
                         fullWidth
-                        value={tax == null ? "" : tax}
+                        value={tax == null ? null : tax}
                         onChange={(e) => {
                           setTax(e.target.value);
                         }}
@@ -872,7 +804,7 @@ export default function User() {
                   <Box
                     sx={{
                       mt: 3,
-                      width: 400,
+                      width: 450,
                       display: "flex",
                       justifyContent: "space-between",
                     }}
@@ -1041,12 +973,11 @@ export default function User() {
           <Box
             sx={{
               mt: 4,
+              ml: 3,
               width: 400,
-              display: "flex",
-              justifyContent: "space-between",
             }}
           >
-            <Box>
+            {value == "1" ? (
               <Button
                 variant="contained"
                 size="middle"
@@ -1055,27 +986,18 @@ export default function User() {
               >
                 <Typography fontSize={14}>Edit Member</Typography>
               </Button>
-              <Link
-                underline="hover"
-                to={`/member`}
-                style={{ textDecoration: "none" }}
-              >
-                <Button variant="contained" size="middle" color="inherit">
-                  <Typography fontSize={14} style={{ color: "#212121" }}>
-                    Cancel
-                  </Typography>
-                </Button>
-              </Link>
-            </Box>
-            <Box>
-              {!loadingeditmember ? (
-                <Box sx={{ width: "100%" }}>
-                  <CircularProgress disableShrink />
-                </Box>
-              ) : (
-                ""
-              )}
-            </Box>
+            ) : null}
+            <Link
+              underline="hover"
+              to={`/member`}
+              style={{ textDecoration: "none" }}
+            >
+              <Button variant="contained" size="middle" color="inherit">
+                <Typography fontSize={14} style={{ color: "#212121" }}>
+                  Cancel
+                </Typography>
+              </Button>
+            </Link>
           </Box>
         </Box>
       </Box>
@@ -1088,7 +1010,7 @@ export default function User() {
             เปลี่ยนชื่อบริษัทประกัน
           </Typography>
           <Box>
-            <Box sx={{ mt: 4, width: 540 }}>
+            <Box sx={{ mt: 2, mb: 2, width: 540 }}>
               {!loadingchange ? (
                 <Box sx={{ width: "100%" }}>
                   <LinearProgress variant="determinate" value={progress} />
@@ -1105,9 +1027,20 @@ export default function User() {
                   size="middle"
                   fullWidth
                   value={newThaiName}
+                  error={errTname}
                   onChange={(e) => {
                     setNewThaiName(e.target.value);
+                    if (e.target.value) {
+                      setErrTextTname("");
+                      setErrTname(false);
+                    } else {
+                      setErrTextTname("Thai Name is required");
+                      setErrTname(true);
+                    }
                   }}
+                  helperText={
+                    <Typography color="error">{errTextTname}</Typography>
+                  }
                 />
               </Box>
               <Box sx={{ mt: 2, width: 220 }}>
@@ -1117,9 +1050,20 @@ export default function User() {
                   size="middle"
                   fullWidth
                   value={newEngName}
+                  error={errEname}
                   onChange={(e) => {
                     setNewEngName(e.target.value);
+                    if (e.target.value) {
+                      setErrTextEname("");
+                      setErrEname(false);
+                    } else {
+                      setErrTextEname("English Name is required");
+                      setErrEname(true);
+                    }
                   }}
+                  helperText={
+                    <Typography color="error">{errTextEname}</Typography>
+                  }
                 />
               </Box>
             </Box>
@@ -1131,9 +1075,20 @@ export default function User() {
                   size="middle"
                   fullWidth
                   value={newShortName}
+                  error={errEetname}
                   onChange={(e) => {
                     setNewShortName(e.target.value);
+                    if (e.target.value) {
+                      setErrTextEetname("");
+                      setErrEetname(false);
+                    } else {
+                      setErrTextEetname("Shorten Name is required");
+                      setErrEetname(true);
+                    }
                   }}
+                  helperText={
+                    <Typography color="error">{errTextEetname}</Typography>
+                  }
                 />
               </Box>
               <Box sx={{ mt: 3, width: 220 }}>
@@ -1159,7 +1114,28 @@ export default function User() {
                   marginRight: "10px",
                   padding: "10px",
                 }}
-                onClick={changecompanyname}
+                onClick={() => {
+                  if (newThaiName.length === 0) {
+                    setErrTname(true);
+                    setErrTextTname("Thai Name is required");
+                  }
+                  if (newEngName.length === 0) {
+                    setErrEname(true);
+                    setErrTextEname("English Name is required");
+                  }
+                  if (newShortName.length === 0) {
+                    setErrEetname(true);
+                    setErrTextEetname("Shorten Name is required");
+                  }
+
+                  if (
+                    newThaiName.length > 0 &&
+                    newEngName.length > 0 &&
+                    newShortName.length > 0
+                  ) {
+                    changecompanyname();
+                  }
+                }}
               >
                 <Typography fontSize={12}>Save</Typography>
               </Button>
@@ -1209,7 +1185,7 @@ export default function User() {
               variant="contained"
               size="large"
             >
-              <span>Update</span>
+              <span>Edit</span>
             </LoadingButton>
             <Button
               style={{ marginLeft: 12 }}

@@ -2,36 +2,30 @@ import * as React from "react";
 import { useState } from "react";
 
 import Box from "@mui/material/Box";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
-import Container from "@mui/material/Container";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Logo from "../img/logo2.png";
-import { postLogin, GetUserMe } from "../services/API"; //Todo
-import RouteService from "../services/routeService";
+import { postLogin } from "../services/API"; //Todo
 import Swal from "sweetalert2";
-
-import axios from "axios";
-import * as config from "../config";
-import { border } from "@chakra-ui/react";
-import CircularProgress from "@mui/material/CircularProgress";
-import LoadingIcon from "../components/loadingIcon";
 import LinearProgress from "@mui/material/LinearProgress";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 
 const dataconfig = {};
 dataconfig.RealData = true; // true: call api, false: mockup data
 
 export default function LoginForm() {
-  // const [loginInput, setLogin] = useState({
-  //   email: "",
-  //   password: "",
-  // });
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(true);
 
-  const [progress, setProgress] = React.useState(0);
+  const [errTextEmail, setErrTextEmail] = useState("");
+  //const [errEmail, setErrEmail] = useState(false);
+  const [errTextPassword, setErrTextPassword] = useState("");
+  //const [errPassword, setErrPassword] = useState(false);
+
+  const [loading, setLoading] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const [showPassword, setShowPassword] = useState(false);
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
 
   React.useEffect(() => {
     const timer = setInterval(() => {
@@ -49,19 +43,9 @@ export default function LoginForm() {
     };
   }, []);
 
-  // const handleInput = (e) => {
-  //   e.persist();
-  //   setLogin({ ...loginInput, [e.target.name]: e.target.value });
-  // };
-
-  // Call API Check User Password
   const loginSubmit = (e) => {
     e.preventDefault();
     setLoading(false);
-    // const data = {
-    //   email: loginInput.email,
-    //   password: loginInput.password,
-    // };
     const data = {
       email: email,
       password: password,
@@ -109,21 +93,17 @@ export default function LoginForm() {
       sx={{
         display: "flex",
         height: "100vh",
-        width: "100%",
-        alignItems: "center",
-        justifyContent: "center",
+        width: "100vw",
         backgroundColor: "#82b1ff",
       }}
     >
       <Box
         sx={{
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          width: "50%",
-          height: "100%",
-          // margin: "120px",
+          width: "50vw",
+          height: "100vh",
         }}
       >
         <img
@@ -132,7 +112,7 @@ export default function LoginForm() {
           style={{
             width: "500px",
             height: "150px",
-            margin: "120px",
+            marginLeft: "100px",
           }}
         />
       </Box>
@@ -142,102 +122,129 @@ export default function LoginForm() {
         noValidate
         sx={{
           display: "flex",
-          flexDirection: "column",
-          marginLeft: "120px",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "50vw",
+          height: "100vh",
         }}
       >
-        <Typography fontSize={30} sx={{ color: "#0d47a1" }}>
-          Welcome
-        </Typography>
-        <Typography fontSize={28} sx={{ mb: 3, color: "#f5f5f5" }}>
-          Login to TLAA
-        </Typography>
-        <form>
-          <div>
-            <label style={{ fontSize: "14px", color: "#f5f5f5" }}>
-              Email :
-            </label>
-            <input
-              type="text"
-              name="username"
-              // onChange={handleInput}
-              // value={loginInput.email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-              }}
-              value={email}
-              style={{
-                display: "flex",
-                padding: 10,
-                marginTop: 10,
-                marginBottom: 10,
-                textDecoration: "center",
-                width: "350px",
-                fontSize: "16px",
-                backgroundColor: "#f5f5f5",
-              }}
-            ></input>
-          </div>
-          <div>
-            <label style={{ fontSize: "14px", color: "#f5f5f5" }}>
-              Password :
-            </label>
-            <input
-              type="password"
-              name="password"
-              // onChange={handleInput}
-              // value={loginInput.password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-              }}
-              value={password}
-              style={{
-                display: "flex",
-                padding: 10,
-                marginTop: 10,
-                textDecoration: "center",
-                width: "350px",
-                fontSize: "16px",
-                backgroundColor: "#f5f5f5",
-              }}
-            ></input>
-          </div>
+        <Box>
+          <Typography fontSize={30} sx={{ color: "#0d47a1" }}>
+            Welcome
+          </Typography>
+          <Typography fontSize={28} sx={{ mb: 3, color: "#f5f5f5" }}>
+            Login to TLAA
+          </Typography>
+          <form>
+            <div>
+              <label style={{ fontSize: "14px", color: "#f5f5f5" }}>
+                Email :
+              </label>
+              <input
+                type="text"
+                name="email"
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                }}
+                value={email}
+                placeholder="Email is required"
+                style={{
+                  display: "flex",
+                  padding: 10,
+                  marginTop: 10,
+                  marginBottom: 10,
+                  textDecoration: "center",
+                  width: "350px",
+                  height: "25px",
+                  fontSize: "12px",
+                  backgroundColor: "#f5f5f5",
+                  border: "solid 0.5px #424242 ",
+                }}
+              ></input>
+            </div>
+            <div>
+              <label style={{ fontSize: "14px", color: "#f5f5f5" }}>
+                Password :
+              </label>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                  }}
+                  value={password}
+                  placeholder="Password is required"
+                  style={{
+                    display: "flex",
+                    padding: 10,
+                    marginTop: 10,
+                    textDecoration: "center",
+                    width: "308px",
+                    height: "25px",
+                    fontSize: "12px",
+                    backgroundColor: "#f5f5f5",
+                    border: "solid 0.5px #424242 ",
+                  }}
+                />
+                <div
+                  onClick={handleClickShowPassword}
+                  style={{
+                    display: "flex",
+                    marginTop: 10,
+                    width: "40px",
+                    fontSize: "16px",
+                    backgroundColor: "#f5f5f5",
+                    border: "solid 0.5px #424242 ",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                  }}
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </div>
+              </div>
+              {errTextPassword}
+            </div>
 
-          <Box
-            style={{
-              marginTop: 35,
-              width: "370px",
-            }}
-          >
-            {!loading ? (
-              <Box sx={{ width: "100%" }}>
-                <LinearProgress variant="determinate" value={progress} />
-              </Box>
-            ) : (
-              ""
-            )}
-          </Box>
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            <button
-              type="submit"
-              onClick={loginSubmit}
+            {/* {errText} */}
+
+            <Box
               style={{
-                padding: 10,
-                marginTop: 5,
-                textDecoration: "center",
+                marginTop: 35,
                 width: "370px",
-                backgroundColor: "#0d47a1",
-                color: "#fff",
-                border: "none",
-                cursor: "pointer",
               }}
             >
-              <Box style={{ display: "flex", justifyContent: "center" }}>
-                <Typography fontSize={16}>Login </Typography>
-              </Box>
-            </button>
-          </div>
-        </form>
+              {!loading ? (
+                <Box sx={{ width: "100%" }}>
+                  <LinearProgress variant="determinate" value={progress} />
+                </Box>
+              ) : (
+                ""
+              )}
+            </Box>
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <button
+                type="submit"
+                onClick={loginSubmit}
+                style={{
+                  padding: 10,
+                  marginTop: 5,
+                  textDecoration: "center",
+                  width: "370px",
+                  backgroundColor: "#0d47a1",
+                  color: "#fff",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                <Box style={{ display: "flex", justifyContent: "center" }}>
+                  <Typography fontSize={16}>Login </Typography>
+                </Box>
+              </button>
+            </div>
+          </form>
+        </Box>
       </Box>
     </Box>
   );

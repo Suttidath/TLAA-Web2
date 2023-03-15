@@ -26,6 +26,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import LoadingButton from "@mui/lab/LoadingButton";
 import CloseIcon from "@mui/icons-material/Close";
 import SaveIcon from "@mui/icons-material/Save";
+import MaskedInput from "react-text-mask";
 
 const styleModal = {
   position: "absolute",
@@ -54,6 +55,15 @@ export default function User() {
   const [address2, setAddress2] = React.useState("");
   const [fax, setFax] = React.useState("");
   const [tax, setTax] = React.useState("");
+
+  const [errTextTname, setErrTextTname] = React.useState("");
+  const [errTname, setErrTname] = React.useState(false);
+  const [errTextEname, setErrTextEname] = React.useState("");
+  const [errEname, setErrEname] = React.useState(false);
+  const [errTextEetname, setErrTextEetname] = React.useState("");
+  const [errEetname, setErrEetname] = React.useState(false);
+  const [errTextComcode, setErrTextComcode] = React.useState("");
+  const [errComcode, setErrComcode] = React.useState(false);
 
   const [openModal, setOpenModal] = useState(false);
   const [loadingbutton, setloadingbutton] = useState(false);
@@ -194,9 +204,18 @@ export default function User() {
               size="middle"
               fullWidth
               value={thaiName}
+              error={errTname}
               onChange={(e) => {
                 setThaiName(e.target.value);
+                if (e.target.value) {
+                  setErrTextTname("");
+                  setErrTname(false);
+                } else {
+                  setErrTextTname("Insurance Thai Name is required");
+                  setErrTname(true);
+                }
               }}
+              helperText={<Typography color="error">{errTextTname}</Typography>}
             />
           </Box>
           <Box sx={{ width: 400, mr: 4 }}>
@@ -206,9 +225,18 @@ export default function User() {
               size="middle"
               fullWidth
               value={engName}
+              error={errEname}
               onChange={(e) => {
                 setEngName(e.target.value);
+                if (e.target.value) {
+                  setErrTextEname("");
+                  setErrEname(false);
+                } else {
+                  setErrTextEname("Insurance English Name is required");
+                  setErrEname(true);
+                }
               }}
+              helperText={<Typography color="error">{errTextEname}</Typography>}
             />
           </Box>
         </Box>
@@ -216,14 +244,25 @@ export default function User() {
         <Box sx={{ mt: 3, display: "flex" }}>
           <Box sx={{ width: 400, mr: 4 }}>
             <TextField
-              label="Insurance Shorten Name "
+              label="Insurance Shorten Name"
               variant="outlined"
               size="middle"
               fullWidth
               value={engEtName}
+              error={errEetname}
               onChange={(e) => {
                 setengEtName(e.target.value);
+                if (e.target.value) {
+                  setErrTextEetname("");
+                  setErrEetname(false);
+                } else {
+                  setErrTextEetname("Insurance Shorten Name is required");
+                  setErrEetname(true);
+                }
               }}
+              helperText={
+                <Typography color="error">{errTextEetname}</Typography>
+              }
             />
           </Box>
           <Box sx={{ width: 400, mr: 4 }}>
@@ -233,9 +272,20 @@ export default function User() {
               size="middle"
               fullWidth
               value={companyCode}
+              error={errComcode}
               onChange={(e) => {
                 setCompanyCode(e.target.value);
+                if (e.target.value) {
+                  setErrTextComcode("");
+                  setErrComcode(false);
+                } else {
+                  setErrTextComcode("Insurance Code is required");
+                  setErrComcode(true);
+                }
               }}
+              helperText={
+                <Typography color="error">{errTextComcode}</Typography>
+              }
             />
           </Box>
         </Box>
@@ -253,7 +303,7 @@ export default function User() {
               }}
             />
           </Box>
-          <Box sx={{ width: 400 }}>
+          <Box sx={{ width: 400, mr: 4 }}>
             <TextField
               label="Email"
               variant="outlined"
@@ -280,27 +330,77 @@ export default function User() {
               }}
             />
           </Box>
-          <Box sx={{ width: 400 }}>
-            <TextField
-              label="Phone Number"
-              variant="outlined"
-              size="middle"
-              fullWidth
-              value={phone}
+
+          <Box sx={{ width: 400, mr: 4 }}>
+            <MaskedInput
+              guide={true}
+              mask={[
+                /\d/,
+                /\d/,
+                /\d/,
+                "-",
+                /\d/,
+                /\d/,
+                /\d/,
+                "-",
+                /\d/,
+                /\d/,
+                /\d/,
+                /\d/,
+              ]}
               onChange={(e) => {
                 setPhone(e.target.value);
+                console.log(e.target.value);
               }}
+              render={(ref, props) => (
+                <TextField
+                  fullWidth
+                  inputMode="numeric"
+                  inputProps={{ inputMode: "numeric" }}
+                  inputRef={ref}
+                  label="Phone Number"
+                  placeholder="0XX-XXX-XXXX"
+                  variant="outlined"
+                  {...props}
+                />
+              )}
+              showMask={false}
+              value={phone}
             />
           </Box>
         </Box>
 
         <Box sx={{ mt: 3, display: "flex" }}>
           <Box sx={{ width: 400, mr: 4 }}>
-            <TextField
-              label="Fax No."
-              variant="outlined"
-              size="middle"
-              fullWidth
+            <MaskedInput
+              guide={true}
+              mask={[
+                /\d/,
+                /\d/,
+                /\d/,
+                "-",
+                /\d/,
+                /\d/,
+                /\d/,
+                "-",
+                /\d/,
+                /\d/,
+                /\d/,
+                /\d/,
+              ]}
+              render={(ref, props) => (
+                <TextField
+                  fullWidth
+                  label="Fax No."
+                  variant="outlined"
+                  inputMode="numeric"
+                  inputProps={{ inputMode: "numeric" }}
+                  placeholder="XXX-XXX-XXXX"
+                  inputRef={ref}
+                  {...props}
+                />
+              )}
+              showMask={false}
               value={fax}
               onChange={(e) => {
                 setFax(e.target.value);
@@ -313,6 +413,7 @@ export default function User() {
               variant="outlined"
               size="middle"
               fullWidth
+              type="number"
               value={tax}
               onChange={(e) => {
                 setTax(e.target.value);
@@ -337,7 +438,35 @@ export default function User() {
             variant="contained"
             size="middle"
             style={{ backgroundColor: "#32B917", marginRight: "15px" }}
-            onClick={handleOpenModal}
+            //onClick={handleOpenModal}
+            onClick={() => {
+              if (thaiName.length === 0) {
+                setErrTname(true);
+                setErrTextTname("Insurance Thai Name is required");
+              }
+              if (companyCode.length === 0) {
+                setErrComcode(true);
+                setErrTextComcode("Insurance Code is required");
+              }
+
+              if (engName.length === 0) {
+                setErrEname(true);
+                setErrTextEname("Insurance English Name is required");
+              }
+              if (engEtName.length === 0) {
+                setErrEetname(true);
+                setErrTextEetname("Insurance Shorten Name is required");
+              }
+
+              if (
+                thaiName.length > 0 &&
+                companyCode.length > 0 &&
+                engName.length > 0 &&
+                engEtName.length > 0
+              ) {
+                handleOpenModal();
+              }
+            }}
           >
             <Typography fontSize={14}>Add Member</Typography>
           </Button>

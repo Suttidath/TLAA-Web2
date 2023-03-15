@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import Box from "@mui/material/Box";
 
 import IconButton from "@mui/material/IconButton";
+import { useForm } from "react-hook-form";
 
 import {
   Typography,
@@ -25,6 +26,15 @@ import GroupAddIcon from "@mui/icons-material/GroupAdd";
 import LoadingButton from "@mui/lab/LoadingButton";
 import CloseIcon from "@mui/icons-material/Close";
 import SaveIcon from "@mui/icons-material/Save";
+import PhoneInput from "react-phone-input-2";
+import MuiPhoneNumber from "material-ui-phone-number";
+import PropTypes from "prop-types";
+import { IMaskInput } from "react-imask";
+import { NumericFormat } from "react-number-format";
+import Input from "@mui/material/Input";
+import MaskedInput from "react-text-mask";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 
 const styleModal = {
   position: "absolute",
@@ -62,6 +72,25 @@ export default function User() {
   const [lastName, setLastName] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [datacompany, setDataCompany] = React.useState([]);
+
+  // validation err Text //
+  const [errTextFname, setErrTextFname] = React.useState("");
+  const [errFname, setErrFname] = React.useState(false);
+  const [errTextLname, setErrTextLname] = React.useState("");
+  const [errLname, setErrLname] = React.useState(false);
+  const [errTextEmail, setErrTextEmail] = React.useState("");
+  const [errEmail, setErrEmail] = React.useState(false);
+  const [errTextPass, setErrTextPass] = React.useState("");
+  const [errPass, setErrPass] = React.useState(false);
+  const [errTextCom, setErrTextCom] = React.useState("");
+  const [errCom, setErrCom] = React.useState(false);
+  const [errTextRole, setErrTextRole] = React.useState("");
+  const [errRole, setErrRole] = React.useState(false);
+
+  // const [shopCart, setShopCart] = useState({
+  //   item1: "Juice",
+  //   item2: "Icrecream",
+  // });
 
   const [progress, setProgress] = React.useState(0);
   const [values, setValues] = useState({});
@@ -239,10 +268,11 @@ export default function User() {
           </Typography>
         </Box>
 
-        <Box>
+        <Box component="form" noValidate autoComplete="off">
           <Box sx={{ mt: 3, display: "flex" }}>
             <Box sx={{ width: 400, mr: 4 }}>
               <TextField
+                error={errFname}
                 label="FirstName"
                 variant="outlined"
                 size="middle"
@@ -250,7 +280,17 @@ export default function User() {
                 value={firstName}
                 onChange={(e) => {
                   setFirstName(e.target.value);
+                  if (e.target.value) {
+                    setErrTextFname("");
+                    setErrFname(false);
+                  } else {
+                    setErrTextFname("Firstname is required");
+                    setErrFname(true);
+                  }
                 }}
+                helperText={
+                  <Typography color="error">{errTextFname}</Typography>
+                }
               />
             </Box>
             <Box sx={{ width: 400 }}>
@@ -260,9 +300,20 @@ export default function User() {
                 size="middle"
                 fullWidth
                 value={lastName}
+                error={errLname}
                 onChange={(e) => {
                   setLastName(e.target.value);
+                  if (e.target.value) {
+                    setErrTextLname("");
+                    setErrLname(false);
+                  } else {
+                    setErrTextLname("Lastname is required");
+                    setErrLname(true);
+                  }
                 }}
+                helperText={
+                  <Typography color="error">{errTextLname}</Typography>
+                }
               />
             </Box>
           </Box>
@@ -275,9 +326,20 @@ export default function User() {
                 size="middle"
                 fullWidth
                 value={email}
+                error={errEmail}
                 onChange={(e) => {
                   setEmail(e.target.value);
+                  if (e.target.value) {
+                    setErrTextEmail("");
+                    setErrEmail(false);
+                  } else {
+                    setErrTextEmail("Email is required");
+                    setErrEmail(true);
+                  }
                 }}
+                helperText={
+                  <Typography color="error">{errTextEmail}</Typography>
+                }
               />
             </Box>
             <Box sx={{ width: 400 }}>
@@ -302,28 +364,63 @@ export default function User() {
                   }
                   label="Password"
                   value={password}
+                  error={errPass}
                   onChange={(e) => {
                     setPassword(e.target.value);
+                    if (e.target.value) {
+                      setErrTextPass("");
+                      setErrPass(false);
+                    } else {
+                      setErrTextPass("Password is required");
+                      setErrPass(true);
+                    }
                   }}
                 />
+                <Typography sx={{ mt: 0.5, ml: 1.5 }} color="error">
+                  {errTextPass}
+                </Typography>
               </FormControl>
             </Box>
           </Box>
 
           <Box sx={{ mt: 3, display: "flex" }}>
             <Box sx={{ width: 400, mr: 4 }}>
-              <TextField
-                label="Phone No."
-                variant="outlined"
-                size="middle"
-                fullWidth
-                value={phone}
+              <MaskedInput
+                //guide={true}
+                mask={[
+                  /\d/,
+                  /\d/,
+                  /\d/,
+                  "-",
+                  /\d/,
+                  /\d/,
+                  /\d/,
+                  "-",
+                  /\d/,
+                  /\d/,
+                  /\d/,
+                  /\d/,
+                ]}
                 onChange={(e) => {
                   setPhone(e.target.value);
+                  console.log(e.target.value);
                 }}
+                render={(ref, props) => (
+                  <TextField
+                    fullWidth
+                    inputMode="numeric"
+                    inputProps={{ inputMode: "numeric" }}
+                    inputRef={ref}
+                    label="Phone No."
+                    placeholder="0XX-XXX-XXXX"
+                    variant="outlined"
+                    {...props}
+                  />
+                )}
+                showMask={false}
+                value={phone}
               />
             </Box>
-
             <Box sx={{ width: 400 }}>
               <TextField
                 label="ตำแหน่งงาน"
@@ -347,10 +444,19 @@ export default function User() {
                 fullWidth
                 select
                 value={company}
+                error={errCom}
                 onChange={(e) => {
                   setCompany(e.target.value);
-                  console.log(e.target.value);
+                  console.log(company);
+                  if (e.target.value) {
+                    setErrTextCom("");
+                    setErrCom(false);
+                  } else {
+                    setErrTextCom("Company member is required");
+                    setErrCom(true);
+                  }
                 }}
+                helperText={<Typography color="error">{errTextCom}</Typography>}
               >
                 {datacompany.map((option, index) => (
                   <MenuItem key={index} value={option.company_id}>
@@ -366,9 +472,20 @@ export default function User() {
                 select
                 label="Role"
                 value={role}
+                error={errRole}
                 onChange={(e) => {
                   setRole(e.target.value);
+                  if (e.target.value) {
+                    setErrTextRole("");
+                    setErrRole(false);
+                  } else {
+                    setErrTextRole("Role is required");
+                    setErrRole(true);
+                  }
                 }}
+                helperText={
+                  <Typography color="error">{errTextRole}</Typography>
+                }
               >
                 {Roles.map((option) => (
                   <MenuItem key={option.id} value={option.value}>
@@ -396,7 +513,43 @@ export default function User() {
             variant="contained"
             size="middle"
             style={{ backgroundColor: "#32B917", marginRight: "15px" }}
-            onClick={handleOpenModal}
+            onClick={() => {
+              if (firstName.length === 0) {
+                setErrFname(true);
+                setErrTextFname("Firstname is required");
+              }
+              if (lastName.length === 0) {
+                setErrLname(true);
+                setErrTextLname("Lastname is required");
+              }
+              if (email.length === 0) {
+                setErrEmail(true);
+                setErrTextEmail("Email is required");
+              }
+              if (password.length === 0) {
+                setErrPass(true);
+                setErrTextPass("Password is required");
+              }
+              if (company.length === 0) {
+                setErrCom(true);
+                setErrTextCom("Company member is required");
+              }
+
+              if (role.length === 0) {
+                setErrRole(true);
+                setErrTextRole("Role is required");
+              }
+              if (
+                firstName.length > 0 &&
+                lastName.length > 0 &&
+                email.length > 0 &&
+                password.length > 0 &&
+                company > 0 &&
+                role.length > 0
+              ) {
+                handleOpenModal();
+              }
+            }}
           >
             <Typography fontSize={14}>Add User</Typography>
           </Button>

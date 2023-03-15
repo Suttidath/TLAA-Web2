@@ -29,7 +29,13 @@ import Swal from "sweetalert2";
 import ClearIcon from "@mui/icons-material/Clear";
 import FormA from "../Components/FormA";
 import FormB from "../Components/FormB";
-import { getCompanyAll, getMonthly, postAddformA } from "../service";
+import {
+  getCompanyAll,
+  getMonthly,
+  postAddformA,
+  postAddformB,
+  deleteMonthly,
+} from "../service";
 import LinearProgress from "@mui/material/LinearProgress";
 import { Empty } from "antd";
 import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
@@ -44,7 +50,9 @@ import moment from "moment";
 import LoadingButton from "@mui/lab/LoadingButton";
 import CloseIcon from "@mui/icons-material/Close";
 import SaveIcon from "@mui/icons-material/Save";
+import DeleteIcon from "@mui/icons-material/Delete";
 import { set } from "date-fns";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 const style = {
   position: "absolute",
@@ -59,6 +67,19 @@ const style = {
 };
 
 const styleModal = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 500,
+  height: 200,
+  bgcolor: "background.paper",
+  borderRadius: 3,
+  boxShadow: 24,
+  p: 3,
+};
+
+const styleModaldelete = {
   position: "absolute",
   top: "50%",
   left: "50%",
@@ -145,130 +166,6 @@ TablePaginationActions.propTypes = {
   rowsPerPage: PropTypes.number.isRequired,
 };
 
-function createData(name, calories, fat, form, status, date, time) {
-  return { name, calories, fat, form, status, date, time };
-}
-
-const rows = [
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "A",
-    "Wait to confirm",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "B",
-    "Confirm",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "A",
-    "Confirm",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "B",
-    "Confirm",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "A",
-    "Confirm",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "B",
-    "Confirm",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2019,
-    "A",
-    "Confirm",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "B",
-    "Confirm",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "A",
-    "Confirm",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2021,
-    "B",
-    "Wait to confirm",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "A",
-    "Confirm",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "B",
-    "Confirm",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "A",
-    "Wait to confirm",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-].sort((a, b) => (a.calories < b.calories ? -1 : 1));
-
 const columns = [
   {
     id: "Insurance",
@@ -302,44 +199,6 @@ const columns = [
   },
 ];
 
-const months = [
-  {
-    value: "Jan",
-    label: "January",
-  },
-  {
-    value: "Feb",
-    label: "Febuary",
-  },
-  {
-    value: "Sep",
-    label: "September",
-  },
-  {
-    value: "Oct",
-    label: "October",
-  },
-];
-
-const years = [
-  {
-    value: "2022",
-    label: "2022",
-  },
-  {
-    value: "2021",
-    label: "2021",
-  },
-  {
-    value: "2020",
-    label: "2020",
-  },
-  {
-    value: "2019",
-    label: "2019",
-  },
-];
-
 const forms = [
   {
     value: "All",
@@ -370,68 +229,10 @@ const statuses = [
   },
 ];
 
-const FormA_One = [
-  {
-    id: "ชื่อบริษัท",
-    label: "ชื่อบริษัท",
-    align: "center",
-  },
-  {
-    id: "Template",
-    label: "Template",
-    align: "center",
-  },
-  {
-    id: "รหัสสมาชิก",
-    label: "รหัสสมาชิก",
-    align: "center",
-  },
-  {
-    id: "ค.ศ.",
-    label: "ค.ศ.",
-    align: "center",
-  },
-  {
-    id: "ประจำเดือน",
-    label: "ประจำเดือน",
-    align: "center",
-  },
-  {
-    id: "ประเภทข้อมูล",
-    label: "ประเภทข้อมูล",
-    align: "center",
-  },
-  {
-    id: "จำนวนรายการ",
-    label: "จำนวนรายการ",
-    align: "center",
-  },
-];
-
-const FormA_Two = [
-  {
-    id: "ประเภท",
-    label: "ประเภท",
-    align: "center",
-  },
-  {
-    id: "จำนวนกรมธรรม์",
-    label: "จำนวนกรมธรรม์",
-    align: "left",
-  },
-  {
-    id: "จำนวนคน",
-    label: "จำนวนคน",
-    align: "left",
-  },
-  {
-    id: "จำนวนเงินเอาประกันภัย(ของสัญญาหลัก)",
-    label: "จำนวนเงินเอาประกันภัย(ของสัญญาหลัก)",
-    align: "left",
-  },
-];
-
 export default function Monthly() {
+  const [value, setValue] = React.useState(moment().format("YYYY-MM"));
+  const [valueYear, setValueYear] = React.useState(moment().format("YYYY"));
+  const [valueMonth, setValueMonth] = React.useState(moment().format("MM"));
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -469,11 +270,29 @@ export default function Monthly() {
     handleRemove();
     handleClearData();
   };
+
+  const [openModaldelete, setOpenModaldelete] = useState(false);
+  const [loadingbuttondelete, setloadingbuttondelete] = useState(false);
+  const handleOpenModaldelete = () => {
+    setOpenModaldelete(true);
+    console.log(id);
+  };
+  const handleCloseModaldelete = () => setOpenModaldelete(false);
+
+  const handleClickModal = () => {
+    setloadingbutton(true);
+    addForm();
+  };
+
+  const handleClickModaldelete = () => {
+    setloadingbuttondelete(true);
+    deleteMonthlyData();
+  };
+
   const [formimport, setFormimport] = useState("");
   const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState(null);
   const [valuepick, setValuePick] = useState("");
-  const [valuemonth, setValueMonth] = useState("");
   // const [value, setValue] = React.useState("");
   const [date, setDate] = React.useState(dayjs("2022-04-07"));
   const [progress, setProgress] = React.useState(0);
@@ -481,6 +300,7 @@ export default function Monthly() {
   const [selectmonth, setSelectMonth] = React.useState(
     moment().format("YYYY-MM")
   );
+  const [id, setId] = useState(null);
 
   let monthtrim = selectmonth.substring(5, 7);
   let yeartrim = selectmonth.substring(0, 4);
@@ -488,6 +308,7 @@ export default function Monthly() {
   const [importmonth, setImportMonth] = React.useState(
     moment().format("YYYY-MM")
   );
+
   //const [selectmonth, setSelectMonth] = useState("");
   const [company, setCompany] = useState("");
   const [template, setTemplate] = useState("");
@@ -537,7 +358,6 @@ export default function Monthly() {
   ////////// for get DataUser //////////
   React.useEffect(() => {
     GetMonthly();
-    //GetInsurance();
   }, []);
 
   const fileRef = useRef();
@@ -550,7 +370,7 @@ export default function Monthly() {
 
   //////////////// setting RowsPerPage ////////////////
   const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
+    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - dataMonthly.length) : 0;
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -563,6 +383,13 @@ export default function Monthly() {
 
   const handleChangeform = (event) => {
     setForm(event.target.value);
+
+    if (event.target.value == "A") {
+      setFormCode("A");
+    }
+    if (event.target.value == "B") {
+      setFormCode("B");
+    }
     if (event.target.value == "All") {
       setFormCode("");
     }
@@ -580,30 +407,11 @@ export default function Monthly() {
     }
   };
 
-  const handleChangeformimport = (event) => {
-    setFormimport(event.target.value);
-  };
-
-  const handleChangeinsuranceid = (event) => {
-    setInsuranceid(event.target.value);
-    console.log(insuranceid);
-  };
-
   const handleChangemonth = (newValue) => {
     setSelectMonth(newValue.format("YYYY-MM"));
-    console.log(newValue.format("YYYY-MM"));
-    console.log(monthtrim);
-    console.log(yeartrim);
-  };
-
-  const handleImportMonth = (newValue) => {
-    setImportMonth(newValue.format("YYYY-MM"));
-    console.log(newValue.format("YYYY-MM"));
-  };
-
-  const handleClickModal = () => {
-    setloadingbutton(true);
-    addFormA();
+    console.log("selectmonth", newValue.format("YYYY-MM"));
+    // console.log(monthtrim);
+    // console.log(yeartrim);
   };
 
   const handleClearData = () => {
@@ -786,12 +594,6 @@ export default function Monthly() {
 
   let temptrim = template.substring(8, 16);
 
-  // const handleRemove = () => {
-  //   setFile(null);
-  //   setFileName(null);
-  //   fileRef.current.value = "";
-  // };
-
   const handleRemove = (jsonData) => {
     setFile(null);
     setFileName(null);
@@ -808,9 +610,10 @@ export default function Monthly() {
   //////////////// Get DataMonthly List ////////////////
   const GetMonthly = () => {
     let qString = "?";
+    //if (companyname) qString = qString + "&company_name=เมือง";
     if (companyname) qString = qString + "&company_name=" + companyname;
-    if (yeartrim) qString = qString + "&year=" + yeartrim;
-    if (monthtrim) qString = qString + "&month=" + monthtrim;
+    if (valueYear) qString = qString + "&year=" + valueYear;
+    if (valueMonth) qString = qString + "&month=" + valueMonth;
     if (formCode) qString = qString + "&formtype=" + formCode;
     if (statusCode) qString = qString + "&status=" + statusCode;
 
@@ -839,7 +642,7 @@ export default function Monthly() {
 
   //////////////// Add User ////////////////
 
-  const addFormA = () => {
+  const addForm = () => {
     //setLoadingAddform(false);
 
     values["company_name"] = company;
@@ -886,34 +689,90 @@ export default function Monthly() {
     values["PAstu2"] = PAstu2;
     values["PAstu3"] = PAstu3;
 
-    postAddformA(values).then((response) => {
-      console.log("postAdduser: response", response);
-      console.log("postAdduser: values", values);
-      if (response && (response.status === 200 || response.status === 201)) {
-        setOpenModal(false);
+    if (template == "tplPC1T2A") {
+      postAddformA(values).then((response) => {
+        console.log("postAdduser: response", response);
+        console.log("postAdduser: values", values);
+        if (response && (response.status === 200 || response.status === 201)) {
+          setOpenModal(false);
+          //console.log("tag_money_id", response.data.tag_money_id);
+          Swal.fire({
+            position: "center",
+            icon: "success",
+            title: "เพิ่ม Form เรียบร้อย!",
+            showConfirmButton: false,
+            timer: 5000,
+          });
+          window.location.pathname = `/monthly/editdata/${response.data.tag_money_id}`;
+        } else {
+          console.log(
+            "API response error1 [" + response.status + "]",
+            response.data.message
+          );
+          setOpenModal(false);
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: response.data.message,
+          });
+        }
+        setloadingbutton(false);
+      });
+    } else if (template == "tplPC1T2B") {
+      postAddformB(values).then((response) => {
+        console.log("postAdduser: response", response);
+        console.log("postAdduser: values", values);
+        if (response && (response.status === 200 || response.status === 201)) {
+          setOpenModal(false);
+          Swal.fire({
+            position: "center",
+            icon: "success",
+            title: "เพิ่ม Form เรียบร้อย!",
+            showConfirmButton: false,
+            timer: 5000,
+          });
+          window.location.pathname = `/monthly/editdata/${response.data.tag_money_id}`;
+        } else {
+          console.log(
+            "API response error1 [" + response.status + "]",
+            response.data.message
+          );
+          setOpenModal(false);
+          Swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: response.data.message,
+          });
+        }
+        setloadingbutton(false);
+      });
+    }
+  };
+
+  //////////////// Delete Monthly by id ////////////////
+  function deleteMonthlyData() {
+    deleteMonthly(id).then((res) => {
+      if (res && res.status === 200) {
+        handleCloseModaldelete();
         Swal.fire({
           position: "center",
           icon: "success",
-          title: "เพิ่ม Member เรียบร้อย!",
+          title: "Detete Form เรียบร้อย!",
           showConfirmButton: false,
-          timer: 2000,
+          timer: 5000,
         });
-        window.location.pathname = "/monthly";
+        window.location.pathname = `/monthly`;
       } else {
-        console.log(
-          "API response error1 [" + response.status + "]",
-          response.data.message
-        );
-        setOpenModal(false);
+        handleCloseModaldelete();
         Swal.fire({
           icon: "error",
           title: "Oops...",
-          text: response.data.message,
+          text: res.data.message,
         });
       }
-      setloadingbutton(false);
+      setloadingbuttondelete(false);
     });
-  };
+  }
 
   return (
     <Box
@@ -983,7 +842,8 @@ export default function Monthly() {
         </Box>
         <Box sx={{ mr: 2 }}>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DesktopDatePicker
+            {/* <DesktopDatePicker
+              clearable
               disableFuture
               label="Month and Year"
               inputFormat="YYYY-MM"
@@ -991,6 +851,51 @@ export default function Monthly() {
               value={selectmonth}
               onChange={handleChangemonth}
               renderInput={(params) => <TextField {...params} />}
+              InputProps={{
+                endAdornment: (
+                  <IconButton onClick={() => setSelectMonth(null)}>
+                    <ClearIcon />
+                  </IconButton>
+                ),
+              }}
+              InputAdornmentProps={{
+                position: "start",
+              }}
+            /> */}
+            <DatePicker
+              disableFuture
+              views={["year", "month"]}
+              label="Year and Month"
+              value={value}
+              onChange={(newValue) => {
+                setValue(newValue.format("YYYY-MM"));
+                setValueYear(newValue.format("YYYY"));
+                setValueMonth(newValue.format("MM"));
+                // console.log("Year", newValue.format("YYYY"));
+                // console.log("Month", newValue.format("MM"));
+              }}
+              renderInput={(params) => (
+                <TextField {...params} helperText={null} />
+              )}
+              InputProps={{
+                endAdornment: (
+                  <IconButton
+                    onClick={() => {
+                      setValue(null);
+                      setValueYear(null);
+                      setValueMonth(null);
+                      // console.log("Year and Month", value);
+                      // console.log("Year", valueYear);
+                      // console.log("Month", valueMonth);
+                    }}
+                  >
+                    <ClearIcon />
+                  </IconButton>
+                ),
+              }}
+              InputAdornmentProps={{
+                position: "start",
+              }}
             />
           </LocalizationProvider>
         </Box>
@@ -1159,6 +1064,11 @@ export default function Monthly() {
                       &nbsp;&nbsp;
                       <BsFillXCircleFill
                         style={{ color: "#f44336", cursor: "pointer" }}
+                        onClick={() => {
+                          setId(row.tag_money_id);
+                          //console.log(row.tag_money_id);
+                          handleOpenModaldelete();
+                        }}
                       />
                     </Typography>
                   </TableCell>
@@ -1330,7 +1240,6 @@ export default function Monthly() {
                   } else {
                     setErrorMsg("** Please choose file excel");
                   }
-                  //addFormA();
                 }}
               >
                 <Typography fontSize={14}>Import</Typography>
@@ -1393,6 +1302,56 @@ export default function Monthly() {
               size="middle"
               color="inherit"
               onClick={handleCloseModal}
+            >
+              <Typography fontSize={14}>cancel</Typography>
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+
+      {/* /////////// Modal confirm Delete form /////////// */}
+
+      <Modal open={openModaldelete}>
+        <Box sx={styleModaldelete}>
+          <Box style={{ display: "flex", justifyContent: "space-between" }}>
+            <Typography marginTop={1} variant="h5" component="h2">
+              Delete form
+            </Typography>
+            <IconButton size="large">
+              <CloseIcon fontSize="inherit" onClick={handleCloseModaldelete} />
+            </IconButton>
+          </Box>
+          <Typography
+            sx={{ mt: 3, color: "#616161" }}
+            fontSize={14}
+            fontWeight={300}
+          >
+            Do you want to confirm Delete form ?
+          </Typography>
+          <Box
+            style={{
+              display: "flex",
+              justifyContent: "end",
+              marginTop: "5rem",
+            }}
+          >
+            <LoadingButton
+              color="error"
+              onClick={handleClickModaldelete}
+              loading={loadingbuttondelete}
+              loadingPosition="start"
+              startIcon={<DeleteIcon />}
+              variant="contained"
+              size="large"
+            >
+              <span>Delete</span>
+            </LoadingButton>
+            <Button
+              style={{ marginLeft: 12 }}
+              variant="outlined"
+              size="middle"
+              color="inherit"
+              onClick={handleCloseModaldelete}
             >
               <Typography fontSize={14}>cancel</Typography>
             </Button>

@@ -102,6 +102,11 @@ TablePaginationActions.propTypes = {
 };
 
 const columns = [
+  // {
+  //   id: "ลำดับ",
+  //   label: "ลำดับ",
+  //   align: "center",
+  // },
   {
     id: "ชื่อผู้ใช้งานระบบ",
     label: "ชื่อผู้ใช้งานระบบ",
@@ -423,8 +428,18 @@ export default function User() {
                 : dataUser
               ).map((row, index) => (
                 <TableRow key={row.id}>
+                  {/* <TableCell
+                    style={{ width: 80, padding: "10px" }}
+                    align="center"
+                  >
+                    <Typography
+                      style={{ fontSize: "1.12rem", fontWeight: "400" }}
+                    >
+                      {index + 1}
+                    </Typography>
+                  </TableCell> */}
                   <TableCell
-                    style={{ width: 600, padding: "10px" }}
+                    style={{ width: 500, padding: "10px" }}
                     align="left"
                   >
                     <Typography
@@ -495,7 +510,7 @@ export default function User() {
                     )}
                   </TableCell>
                   <TableCell
-                    style={{ width: 120, padding: "10px" }}
+                    style={{ width: 150, padding: "10px" }}
                     align="left"
                   >
                     <Link

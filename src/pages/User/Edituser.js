@@ -44,6 +44,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import LoadingButton from "@mui/lab/LoadingButton";
 import CloseIcon from "@mui/icons-material/Close";
 import SaveIcon from "@mui/icons-material/Save";
+import MaskedInput from "react-text-mask";
 
 const styleModal = {
   position: "absolute",
@@ -366,7 +367,6 @@ export default function User() {
           text: "ไม่สามารถ Update User ได้ !!",
         });
       }
-      //setLoading(true);
       setloadingbutton(false);
     });
   };
@@ -556,7 +556,7 @@ export default function User() {
               </Box>
 
               <Box sx={{ mt: 3, display: "flex" }}>
-                <Box sx={{ width: 400, mr: 4 }}>
+                {/* <Box sx={{ width: 400, mr: 4 }}>
                   <TextField
                     label="Phone No."
                     variant="outlined"
@@ -566,6 +566,43 @@ export default function User() {
                     onChange={(e) => {
                       setPhone(e.target.value);
                     }}
+                  />
+                </Box> */}
+                <Box sx={{ width: 400, mr: 4 }}>
+                  <MaskedInput
+                    guide={true}
+                    mask={[
+                      /\d/,
+                      /\d/,
+                      /\d/,
+                      "-",
+                      /\d/,
+                      /\d/,
+                      /\d/,
+                      "-",
+                      /\d/,
+                      /\d/,
+                      /\d/,
+                      /\d/,
+                    ]}
+                    onChange={(e) => {
+                      setPhone(e.target.value);
+                      console.log(e.target.value);
+                    }}
+                    render={(ref, props) => (
+                      <TextField
+                        fullWidth
+                        inputMode="numeric"
+                        inputProps={{ inputMode: "numeric" }}
+                        inputRef={ref}
+                        label="Phone No."
+                        placeholder="0XX-XXX-XXXX"
+                        variant="outlined"
+                        {...props}
+                      />
+                    )}
+                    showMask={false}
+                    value={phone}
                   />
                 </Box>
                 <Box sx={{ width: 400 }}>
