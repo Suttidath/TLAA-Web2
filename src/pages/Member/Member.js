@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { useTheme } from "@mui/material/styles";
 import { Link } from "react-router-dom";
@@ -18,13 +18,11 @@ import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
 import LastPageIcon from "@mui/icons-material/LastPage";
 import { Typography, TextField, Button, MenuItem, Modal } from "@mui/material";
-import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/Search";
 import { FiEdit } from "react-icons/fi";
 import Switch from "@mui/material/Switch";
-import { BsFillXCircleFill, BsJustify } from "react-icons/bs";
-import Addmember from "../Components/Addmember";
+import { BsFillXCircleFill } from "react-icons/bs";
 import Tab from "@mui/material/Tab";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
@@ -37,30 +35,19 @@ import LinearProgress from "@mui/material/LinearProgress";
 import { Empty } from "antd";
 import Swal from "sweetalert2";
 import { getCompanyAll } from "../service";
+import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
 
-const style = {
+const styleModaldelete = {
   position: "absolute",
   top: "50%",
   left: "50%",
   transform: "translate(-50%, -50%)",
-  width: 800,
-  height: "75vh",
+  width: 500,
   bgcolor: "background.paper",
-  //border: "1px solid #000",
-  boxShadow: 16,
-  p: 6,
-};
-
-const style2 = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 520,
-  height: 220,
-  bgcolor: "background.paper",
-  boxShadow: 16,
-  p: 4,
+  borderRadius: 3,
+  boxShadow: 24,
+  p: 3,
 };
 
 function TablePaginationActions(props) {
@@ -137,136 +124,7 @@ TablePaginationActions.propTypes = {
   rowsPerPage: PropTypes.number.isRequired,
 };
 
-function createData(name, calories, fat, form, status, date, time) {
-  return { name, calories, fat, form, status, date, time };
-}
-
-const rows = [
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "A",
-    "Active",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "B",
-    "Active",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "A",
-    "Inactive",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "B",
-    "Active",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "A",
-    "Active",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "B",
-    "Inactive",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2019,
-    "A",
-    "Inactive",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "B",
-    "Active",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "A",
-    "Active",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2021,
-    "B",
-    "Active",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "A",
-    "Active",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "B",
-    "Inactive",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-  createData(
-    "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-    "September",
-    2022,
-    "A",
-    "Active",
-    "1-Sep-2022",
-    "16:16:16"
-  ),
-].sort((a, b) => (a.calories < b.calories ? -1 : 1));
-
 const columns = [
-  // {
-  //   id: "ลำดับ",
-  //   label: "ลำดับ",
-  //   align: "center",
-  // },
   {
     id: "ชื่อบริษัทประกัน",
     label: "ชื่อบริษัทประกัน",
@@ -323,25 +181,6 @@ const changecomp = [
   },
 ];
 
-const months = [
-  {
-    value: "โตเกียวมารีน",
-    label: "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-  },
-  {
-    value: "โตเกียวมารีน",
-    label: "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-  },
-  {
-    value: "โตเกียวมารีน",
-    label: "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-  },
-  {
-    value: "โตเกียวมารีน",
-    label: "โตเกียวมารีนประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
-  },
-];
-
 const statuses = [
   {
     id: "2",
@@ -361,27 +200,40 @@ const statuses = [
 ];
 
 export default function Member() {
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
-  const [loading, setLoading] = React.useState(true);
-  const [dataMember, setDataMember] = React.useState([]);
-  const [loadingBT, setLoadingBT] = React.useState(false);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [loading, setLoading] = useState(true);
+  const [dataMember, setDataMember] = useState([]);
+  const [loadingBT, setLoadingBT] = useState(false);
 
-  const [membername, setMembername] = React.useState("");
-  const [status, setStatus] = React.useState("");
-  const [statusCode, setStatusCode] = React.useState("");
+  const [membername, setMembername] = useState("");
+  const [status, setStatus] = useState("");
+  const [statusCode, setStatusCode] = useState("");
 
-  const [openedit, setOpenedit] = React.useState(false);
+  const [openedit, setOpenedit] = useState(false);
   const handleOpenedit = () => setOpenedit(true);
   const handleCloseedit = () => setOpenedit(false);
 
-  const [openeditcompany, setOpeneditcompany] = React.useState(false);
+  const [openeditcompany, setOpeneditcompany] = useState(false);
   const handleOpeneditcompany = () => setOpeneditcompany(true);
   const handleCloseeditcompany = () => setOpeneditcompany(false);
 
-  const [checked, setChecked] = React.useState(true);
-  const [progress, setProgress] = React.useState(0);
-  const [values, setValues] = React.useState({});
+  const [checked, setChecked] = useState(true);
+  const [progress, setProgress] = useState(0);
+  const [values, setValues] = useState({});
+
+  const [memberValue, setMemberValue] = useState({});
+  const [openModaldelete, setOpenModaldelete] = useState(false);
+  const [loadingbuttondelete, setloadingbuttondelete] = useState(false);
+  const handleOpenModaldelete = () => {
+    setOpenModaldelete(true);
+  };
+  const handleCloseModaldelete = () => setOpenModaldelete(false);
+
+  const handleClickModaldelete = () => {
+    setloadingbuttondelete(true);
+    //  deleteMonthlyData();
+  };
 
   React.useEffect(() => {
     const timer = setInterval(() => {
@@ -402,17 +254,6 @@ export default function Member() {
   React.useEffect(() => {
     GetMember();
   }, []);
-
-  //////////////// change company name ////////////////
-  const [newinsurance, setNewinsurance] = React.useState("");
-  const [valuedate, setValuedate] = React.useState(null);
-
-  //////////////// setting Tabs ////////////////
-  const [value, setValue] = React.useState("1");
-
-  const handleChange = (event, newValue) => {
-    setValue(newValue);
-  };
 
   //////////////// setting RowsPerPage ////////////////
   const emptyRows =
@@ -659,21 +500,30 @@ export default function Member() {
                     style={{ width: 120, padding: "10px" }}
                     align="left"
                   >
-                    <Link
-                      to={`/member/editmember/${row.company_id}`}
-                      style={{ textDecoration: "none" }}
+                    <Typography
+                      style={{
+                        fontSize: "1.75rem",
+                        fontWeight: "450",
+                      }}
                     >
-                      <Typography
-                        style={{
-                          fontSize: "1.75rem",
-                          fontWeight: "450",
-                        }}
+                      <Link
+                        to={`/member/editmember/${row.company_id}`}
+                        style={{ textDecoration: "none" }}
                       >
                         <FiEdit
                           style={{ color: "#4fc3f7", cursor: "pointer" }}
-                        />{" "}
-                      </Typography>
-                    </Link>
+                        />
+                      </Link>
+                      &nbsp;&nbsp;&nbsp;
+                      <BsFillXCircleFill
+                        style={{ color: "#f44336", cursor: "pointer" }}
+                        onClick={() => {
+                          setMemberValue(row);
+                          console.log(row);
+                          handleOpenModaldelete();
+                        }}
+                      />
+                    </Typography>
                   </TableCell>
                 </TableRow>
               ))
@@ -716,306 +566,50 @@ export default function Member() {
         </Table>
       </TableContainer>
 
-      {/*//////////////// Modal popup for edit member ////////////////*/}
-      <Modal open={openedit}>
-        <Box sx={style}>
-          <Typography variant="h4" style={{ color: "#1565c0" }}>
-            Edit member
+      {/* /////////// Modal confirm Delete form /////////// */}
+
+      <Modal open={openModaldelete}>
+        <Box sx={styleModaldelete}>
+          <Box style={{ display: "flex", justifyContent: "space-between" }}>
+            <Typography marginTop={1} variant="h5" component="h2">
+              Delete Member
+            </Typography>
+            <IconButton size="large">
+              <CloseIcon fontSize="inherit" onClick={handleCloseModaldelete} />
+            </IconButton>
+          </Box>
+          <Typography sx={{ mt: 3 }} fontSize={16} fontWeight={300}>
+            Do you want to confirm Delete ?
+          </Typography>
+          <Typography fontSize={14} fontWeight={400}>
+            Company Name: {memberValue.company_name}
           </Typography>
           <Box
-            sx={{ mt: 1, width: "100%", height: "80%", typography: "body1" }}
+            style={{
+              display: "flex",
+              justifyContent: "end",
+              marginTop: "5rem",
+            }}
           >
-            <TabContext value={value}>
-              <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
-                <TabList
-                  onChange={handleChange}
-                  aria-label="lab API tabs example"
-                >
-                  <Tab
-                    label="ข้อมูลสมาชิก"
-                    value="1"
-                    style={{ fontSize: "15px" }}
-                  />
-                  <Tab
-                    label="เปลี่ยนชื่อบริษัทประกัน"
-                    value="2"
-                    style={{ fontSize: "15px" }}
-                  />
-                </TabList>
-              </Box>
-              <TabPanel value="1">
-                <Box>
-                  <Box sx={{ display: "flex" }}>
-                    <Box sx={{ width: 400, mr: 4 }}>
-                      <TextField
-                        label="Insurance name"
-                        variant="outlined"
-                        size="middle"
-                        fullWidth
-                      />
-                    </Box>
-                    <Box sx={{ width: 400 }}>
-                      <TextField
-                        label="Phone No."
-                        variant="outlined"
-                        size="middle"
-                        fullWidth
-                      />
-                    </Box>
-                  </Box>
-
-                  <Box sx={{ mt: 2, display: "flex" }}>
-                    <Box sx={{ width: 400, mr: 4 }}>
-                      <TextField
-                        label="Address1"
-                        variant="outlined"
-                        size="middle"
-                        fullWidth
-                      />
-                    </Box>
-                    <Box sx={{ width: 400 }}>
-                      <TextField
-                        label="Email"
-                        variant="outlined"
-                        size="middle"
-                        fullWidth
-                      />
-                    </Box>
-                  </Box>
-
-                  <Box sx={{ mt: 2, display: "flex" }}>
-                    <Box sx={{ width: 400, mr: 4 }}>
-                      <TextField
-                        label="Address2"
-                        variant="outlined"
-                        size="middle"
-                        fullWidth
-                      />
-                    </Box>
-                    <Box sx={{ width: 400 }}>
-                      <TextField
-                        label="Fax No."
-                        variant="outlined"
-                        size="middle"
-                        fullWidth
-                      />
-                    </Box>
-                  </Box>
-                  <Box sx={{ mt: 2, display: "flex" }}>
-                    <Box sx={{ width: 400, mr: 4 }}>
-                      <TextField
-                        label="Tax Number"
-                        variant="outlined"
-                        size="middle"
-                        fullWidth
-                      />
-                    </Box>
-                    <Box sx={{ width: 400 }}></Box>
-                  </Box>
-                  <Box
-                    sx={{
-                      mt: 3,
-                      width: 400,
-                      display: "flex",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <Box>
-                      <Typography style={{ fontSize: "16px" }}>
-                        Still be our member
-                      </Typography>
-                      <Typography
-                        style={{ fontSize: "12px", color: "#9e9e9e" }}
-                      >
-                        Slide button to inactive member
-                      </Typography>
-                    </Box>
-                    <Box>
-                      <Switch
-                        checked={checked}
-                        onChange={handleChangeSwitch}
-                        inputProps={{ "aria-label": "controlled" }}
-                      />
-                    </Box>
-                  </Box>
-                </Box>
-              </TabPanel>
-              <TabPanel value="2">
-                <Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      width: "100%",
-                      justifyContent: "end",
-                    }}
-                  >
-                    <Button
-                      variant="contained"
-                      size="middle"
-                      style={{
-                        backgroundColor: "#ff9800",
-                        color: "#1a237e",
-                      }}
-                      onClick={() => {
-                        handleCloseedit();
-                        handleOpeneditcompany();
-                      }}
-                    >
-                      <Typography fontSize={14} fontWeight={400}>
-                        เปลี่ยนชื่อบริษัทประกัน
-                      </Typography>
-                    </Button>
-                  </Box>
-                  <Box sx={{ mt: 2 }}>
-                    <TableContainer component={Paper}>
-                      <Table
-                        sx={{ minWidth: 500 }}
-                        aria-label="custom pagination table"
-                      >
-                        <TableHead>
-                          <TableRow>
-                            {changecomp.map((column, index) => (
-                              <TableCell
-                                key={index}
-                                align={column.align}
-                                sx={{
-                                  backgroundColor: "#e3f2fd",
-                                  padding: "10px",
-                                }}
-                              >
-                                <Typography
-                                  style={{
-                                    fontWeight: "500",
-                                    color: "#1565c0",
-                                    fontSize: "1.25rem",
-                                  }}
-                                >
-                                  {column.label}
-                                </Typography>
-                              </TableCell>
-                            ))}
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {datachangecomp.map((row, index) => (
-                            <TableRow key={index}>
-                              <TableCell
-                                style={{ width: 100, padding: "10px" }}
-                                align="left"
-                              >
-                                <Typography
-                                  style={{
-                                    fontSize: "1.12rem",
-                                    fontWeight: "400",
-                                    marginLeft: "25px",
-                                  }}
-                                >
-                                  {row.id}
-                                </Typography>
-                              </TableCell>
-
-                              <TableCell
-                                style={{ width: 300, padding: "10px" }}
-                                align="left"
-                              >
-                                <Typography
-                                  style={{
-                                    fontSize: "1.12rem",
-                                    fontWeight: "400",
-                                  }}
-                                >
-                                  {row.compname}
-                                </Typography>
-                              </TableCell>
-                              <TableCell
-                                style={{ width: 200, padding: "10px" }}
-                                align="left"
-                              >
-                                <Typography
-                                  style={{
-                                    fontSize: "1.12rem",
-                                    fontWeight: "400",
-                                  }}
-                                >
-                                  {row.datechange}
-                                </Typography>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </TableContainer>
-                  </Box>
-                </Box>
-              </TabPanel>
-            </TabContext>
-          </Box>
-          <Box sx={{ mt: 3, display: "flex" }}>
-            <Button
+            <LoadingButton
+              color="error"
+              onClick={handleClickModaldelete}
+              loading={loadingbuttondelete}
+              loadingPosition="start"
+              startIcon={<DeleteIcon />}
               variant="contained"
-              size="middle"
-              style={{
-                backgroundColor: "#32B917",
-                marginRight: "15px",
-              }}
+              size="large"
             >
-              <Typography fontSize={14}>Update</Typography>
-            </Button>
-            <Button variant="contained" size="middle" color="inherit">
-              <Typography fontSize={14} onClick={handleCloseedit}>
-                Cancel
-              </Typography>
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
-
-      <Modal open={openeditcompany}>
-        <Box sx={style2}>
-          <Typography variant="h4" style={{ color: "#1565c0" }}>
-            เปลี่ยนชื่อบริษัทประกัน
-          </Typography>
-          <Box style={{ display: "flex" }}>
-            <Box sx={{ mt: 4, mr: 2, width: 450 }}>
-              <TextField
-                label="ชื่อบริษัทประกันใหม่"
-                variant="outlined"
-                size="middle"
-                fullWidth
-                value={newinsurance}
-                onChange={(e) => {
-                  setNewinsurance(e.target.value);
-                }}
-              />
-            </Box>
-            <Box sx={{ mt: 4, width: 400 }}>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  label="วันที่เปลี่ยน"
-                  value={valuedate}
-                  onChange={(newValue) => {
-                    setValuedate(newValue);
-                  }}
-                  renderInput={(params) => <TextField {...params} />}
-                />
-              </LocalizationProvider>
-            </Box>
-          </Box>
-          <Box sx={{ mt: 8, display: "flex", justifyContent: "end" }}>
+              <span>Delete</span>
+            </LoadingButton>
             <Button
-              variant="contained"
+              style={{ marginLeft: 12 }}
+              variant="outlined"
               size="middle"
-              style={{
-                backgroundColor: "#ff9800",
-                marginRight: "10px",
-              }}
+              color="inherit"
+              onClick={handleCloseModaldelete}
             >
-              <Typography fontSize={12}>Save</Typography>
-            </Button>
-            <Button variant="contained" size="middle" color="inherit">
-              <Typography fontSize={12} onClick={handleCloseeditcompany}>
-                Cancel
-              </Typography>
+              <Typography fontSize={14}>cancel</Typography>
             </Button>
           </Box>
         </Box>
