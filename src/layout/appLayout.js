@@ -19,7 +19,7 @@ export default function AppLayout(props) {
   const { children } = props;
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [userData, setUserData] = useState(
-    JSON.parse(sessionStorage.getItem("azayUserData"))
+    JSON.parse(sessionStorage.getItem("tlaaUserData"))
   ); //Todo
 
   return (

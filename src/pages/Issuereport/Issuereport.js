@@ -333,6 +333,7 @@ export default function Issuereport() {
       } else {
         // setErrormsg("The request is taking too long. Please try again");
         console.log(`err: The request is taking too long. Please try again`);
+        console.log(res);
         Swal.fire({
           position: "center",
           icon: "error",

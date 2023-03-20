@@ -53,6 +53,8 @@ import SaveIcon from "@mui/icons-material/Save";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { set } from "date-fns";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 
 const style = {
   position: "absolute",
@@ -229,6 +231,10 @@ const statuses = [
   },
 ];
 
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
 export default function Monthly() {
   const [value, setValue] = React.useState(moment().format("YYYY-MM"));
   const [valueYear, setValueYear] = React.useState(moment().format("YYYY"));
@@ -245,6 +251,7 @@ export default function Monthly() {
   const [formCode, setFormCode] = useState("");
 
   const [errorMsg, setErrorMsg] = useState("");
+  const [sumErrorMsg, setSumErrorMsg] = useState("");
 
   const [insuranceid, setInsuranceid] = useState("");
   const [loadingAddform, setLoadingAddform] = useState(true);
@@ -269,6 +276,7 @@ export default function Monthly() {
     setOpenModal(false);
     handleRemove();
     handleClearData();
+    setSumErrorMsg("");
   };
 
   const [openModaldelete, setOpenModaldelete] = useState(false);
@@ -287,6 +295,23 @@ export default function Monthly() {
   const handleClickModaldelete = () => {
     setloadingbuttondelete(true);
     deleteMonthlyData();
+  };
+
+  // Snack Bar
+  const vertical = "top";
+  const horizontal = "right";
+  const [openSnack, setOpenSnack] = useState(false);
+
+  const handleClickSnack = () => {
+    setOpenSnack(true);
+  };
+
+  const handleCloseSnack = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnack(false);
   };
 
   const [formimport, setFormimport] = useState("");
@@ -319,41 +344,81 @@ export default function Monthly() {
   const [order, setOrder] = useState("");
 
   //////////////// Variable of Form A,B ////////////////
-  const [ord1, setOrd1] = useState("");
-  const [ord2, setOrd2] = useState("");
-  const [ord3, setOrd3] = useState("");
+  const [ord1, setOrd1] = useState(0);
+  const [ord2, setOrd2] = useState(0);
+  const [ord3, setOrd3] = useState(0);
+  const sumOrd = ord1 + ord2 + ord3;
+  const [impsumOrd, setImpsumOrd] = useState("");
 
-  const [ind1, setInd1] = useState("");
-  const [ind2, setInd2] = useState("");
-  const [ind3, setInd3] = useState("");
+  const [ind1, setInd1] = useState(0);
+  const [ind2, setInd2] = useState(0);
+  const [ind3, setInd3] = useState(0);
+  const sumInd = ind1 + ind2 + ind3;
+  const [impsumInd, setImpsumInd] = useState("");
 
-  const [term1, setTerm1] = useState("");
-  const [term2, setTerm2] = useState("");
-  const [term3, setTerm3] = useState("");
+  const [term1, setTerm1] = useState(0);
+  const [term2, setTerm2] = useState(0);
+  const [term3, setTerm3] = useState(0);
+  const sumTerm = term1 + term2 + term3;
+  const [impsumTerm, setImpsumTerm] = useState("");
 
-  const [endo1, setEndo1] = useState("");
-  const [endo2, setEndo2] = useState("");
-  const [endo3, setEndo3] = useState("");
+  const [endo1, setEndo1] = useState(0);
+  const [endo2, setEndo2] = useState(0);
+  const [endo3, setEndo3] = useState(0);
+  const sumEndo = endo1 + endo2 + endo3;
+  const [impsumEndo, setImpsumEndo] = useState("");
 
-  const [mor1, setMor1] = useState("");
-  const [mor2, setMor2] = useState("");
-  const [mor3, setMor3] = useState("");
+  const [mor1, setMor1] = useState(0);
+  const [mor2, setMor2] = useState(0);
+  const [mor3, setMor3] = useState(0);
+  const sumMor = mor1 + mor2 + mor3;
+  const [impsumMor, setImpsumMor] = useState("");
 
-  const [oth1, setOth1] = useState("");
-  const [oth2, setOth2] = useState("");
-  const [oth3, setOth3] = useState("");
+  const [oth1, setOth1] = useState(0);
+  const [oth2, setOth2] = useState(0);
+  const [oth3, setOth3] = useState(0);
+  const sumOth = oth1 + oth2 + oth3;
+  const [impsumOth, setImpsumOth] = useState("");
 
-  const [PAind1, setPAind1] = useState("");
-  const [PAind2, setPAind2] = useState("");
-  const [PAind3, setPAind3] = useState("");
+  const [PAind1, setPAind1] = useState(0);
+  const [PAind2, setPAind2] = useState(0);
+  const [PAind3, setPAind3] = useState(0);
+  const sumPAind = PAind1 + PAind2 + PAind3;
+  const [impsumPAind, setImpsumPAind] = useState("");
 
-  const [PAgro1, setPAgro1] = useState("");
-  const [PAgro2, setPAgro2] = useState("");
-  const [PAgro3, setPAgro3] = useState("");
+  const [PAgro1, setPAgro1] = useState(0);
+  const [PAgro2, setPAgro2] = useState(0);
+  const [PAgro3, setPAgro3] = useState(0);
+  const sumPAgro = PAgro1 + PAgro2 + PAgro3;
+  const [impsumPAgro, setImpsumPAgro] = useState("");
 
-  const [PAstu1, setPAstu1] = useState("");
-  const [PAstu2, setPAstu2] = useState("");
-  const [PAstu3, setPAstu3] = useState("");
+  const [PAstu1, setPAstu1] = useState(0);
+  const [PAstu2, setPAstu2] = useState(0);
+  const [PAstu3, setPAstu3] = useState(0);
+  const sumPAstu = PAstu1 + PAstu2 + PAstu3;
+  const [impsumPAstu, setImpsumPAstu] = useState("");
+
+  const [impsummary1, setImpsummary1] = useState("");
+  const [impsummary2, setImpsummary2] = useState("");
+  const [impsummary3, setImpsummary3] = useState("");
+  const [impsummary4, setImpsummary4] = useState("");
+
+  const summary1 =
+    ord1 + ind1 + term1 + endo1 + mor1 + oth1 + PAind1 + PAgro1 + PAstu1;
+  const summary2 =
+    ord2 + ind2 + term2 + endo2 + mor2 + oth2 + PAind2 + PAgro2 + PAstu2;
+  const summary3 =
+    ord3 + ind3 + term3 + endo3 + mor3 + oth3 + PAind3 + PAgro3 + PAstu3;
+  const summary4 =
+    sumOrd +
+    sumInd +
+    sumTerm +
+    sumEndo +
+    sumMor +
+    sumOth +
+    sumPAind +
+    sumPAgro +
+    sumPAstu;
 
   ////////// for get DataUser //////////
   React.useEffect(() => {
@@ -407,13 +472,6 @@ export default function Monthly() {
     }
   };
 
-  const handleChangemonth = (newValue) => {
-    setSelectMonth(newValue.format("YYYY-MM"));
-    console.log("selectmonth", newValue.format("YYYY-MM"));
-    // console.log(monthtrim);
-    // console.log(yeartrim);
-  };
-
   const handleClearData = () => {
     //for Table 1
     setCompany("");
@@ -425,41 +483,55 @@ export default function Monthly() {
     setOrder("");
 
     //for Table 2
-    setOrd1("");
-    setOrd2("");
-    setOrd3("");
+    setOrd1(0);
+    setOrd2(0);
+    setOrd3(0);
+    setImpsumOrd("");
 
-    setInd1("");
-    setInd2("");
-    setInd3("");
+    setInd1(0);
+    setInd2(0);
+    setInd3(0);
+    setImpsumInd("");
 
-    setTerm1("");
-    setTerm2("");
-    setTerm3("");
+    setTerm1(0);
+    setTerm2(0);
+    setTerm3(0);
+    setImpsumTerm("");
 
-    setEndo1("");
-    setEndo2("");
-    setEndo3("");
+    setEndo1(0);
+    setEndo2(0);
+    setEndo3(0);
+    setImpsumEndo("");
 
-    setMor1("");
-    setMor2("");
-    setMor3("");
+    setMor1(0);
+    setMor2(0);
+    setMor3(0);
+    setImpsumMor("");
 
-    setOth1("");
-    setOth2("");
-    setOth3("");
+    setOth1(0);
+    setOth2(0);
+    setOth3(0);
+    setImpsumOth("");
 
-    setPAind1("");
-    setPAind2("");
-    setPAind3("");
+    setPAind1(0);
+    setPAind2(0);
+    setPAind3(0);
+    setImpsumPAind("");
 
-    setPAgro1("");
-    setPAgro2("");
-    setPAgro3("");
+    setPAgro1(0);
+    setPAgro2(0);
+    setPAgro3(0);
+    setImpsumPAgro("");
 
-    setPAstu1("");
-    setPAstu2("");
-    setPAstu3("");
+    setPAstu1(0);
+    setPAstu2(0);
+    setPAstu3(0);
+    setImpsumPAstu("");
+
+    setImpsummary1("");
+    setImpsummary2("");
+    setImpsummary3("");
+    setImpsummary4("");
   };
 
   //////////////// Import file xlsx ////////////////
@@ -489,6 +561,7 @@ export default function Monthly() {
     setFile(myFile);
     setFileName(myFile.name);
     setErrorMsg("");
+    setSumErrorMsg("");
 
     if (jsonData[1].__EMPTY_1 == "tplPC1T2A") {
       //for Table 1
@@ -501,41 +574,45 @@ export default function Monthly() {
       setOrder(jsonData[1].__EMPTY_6);
 
       //for Table 2
-      setOrd1(jsonData[5].__EMPTY_4);
-      setOrd2(jsonData[5].__EMPTY_5);
-      setOrd3(jsonData[5].__EMPTY_6);
+      jsonData[5].__EMPTY_4 ? setOrd1(jsonData[5].__EMPTY_4) : setOrd1(0);
+      jsonData[5].__EMPTY_5 ? setOrd2(jsonData[5].__EMPTY_5) : setOrd2(0);
+      jsonData[5].__EMPTY_6 ? setOrd3(jsonData[5].__EMPTY_6) : setOrd3(0);
 
-      setInd1(jsonData[6].__EMPTY_4);
-      setInd2(jsonData[6].__EMPTY_5);
-      setInd3(jsonData[6].__EMPTY_6);
+      jsonData[6].__EMPTY_4 ? setInd1(jsonData[6].__EMPTY_4) : setInd1(0);
+      jsonData[6].__EMPTY_5 ? setInd2(jsonData[6].__EMPTY_5) : setInd2(0);
+      jsonData[6].__EMPTY_6 ? setInd3(jsonData[6].__EMPTY_6) : setInd3(0);
 
-      setTerm1(jsonData[8].__EMPTY_4);
-      setTerm2(jsonData[8].__EMPTY_5);
-      setTerm3(jsonData[8].__EMPTY_6);
+      jsonData[8].__EMPTY_4 ? setTerm1(jsonData[8].__EMPTY_4) : setTerm1(0);
+      jsonData[8].__EMPTY_5 ? setTerm2(jsonData[8].__EMPTY_5) : setTerm2(0);
+      jsonData[8].__EMPTY_6 ? setTerm3(jsonData[8].__EMPTY_6) : setTerm3(0);
 
-      setEndo1(jsonData[9].__EMPTY_4);
-      setEndo2(jsonData[9].__EMPTY_5);
-      setEndo3(jsonData[9].__EMPTY_6);
+      jsonData[9].__EMPTY_4 ? setEndo1(jsonData[9].__EMPTY_4) : setEndo1(0);
+      jsonData[9].__EMPTY_5 ? setEndo2(jsonData[9].__EMPTY_5) : setEndo2(0);
+      jsonData[9].__EMPTY_6 ? setEndo3(jsonData[9].__EMPTY_6) : setEndo3(0);
 
-      setMor1(jsonData[10].__EMPTY_4);
-      setMor2(jsonData[10].__EMPTY_5);
-      setMor3(jsonData[10].__EMPTY_6);
+      jsonData[10].__EMPTY_4 ? setMor1(jsonData[10].__EMPTY_4) : setMor1(0);
+      jsonData[10].__EMPTY_5 ? setMor2(jsonData[10].__EMPTY_5) : setMor2(0);
+      jsonData[10].__EMPTY_6 ? setMor3(jsonData[10].__EMPTY_6) : setMor3(0);
 
-      setOth1(jsonData[11].__EMPTY_4);
-      setOth2(jsonData[11].__EMPTY_5);
-      setOth3(jsonData[11].__EMPTY_6);
+      jsonData[11].__EMPTY_4 ? setOth1(jsonData[11].__EMPTY_4) : setOth1(0);
+      jsonData[11].__EMPTY_5 ? setOth2(jsonData[11].__EMPTY_5) : setOth2(0);
+      jsonData[11].__EMPTY_6 ? setOth3(jsonData[11].__EMPTY_6) : setOth3(0);
 
-      setPAind1(jsonData[12].__EMPTY_4);
-      setPAind2(jsonData[12].__EMPTY_5);
-      setPAind3(jsonData[12].__EMPTY_6);
+      jsonData[12].__EMPTY_4 ? setPAind1(jsonData[12].__EMPTY_4) : setPAind1(0);
+      jsonData[12].__EMPTY_5 ? setPAind2(jsonData[12].__EMPTY_5) : setPAind2(0);
+      jsonData[12].__EMPTY_6 ? setPAind3(jsonData[12].__EMPTY_6) : setPAind3(0);
 
-      setPAgro1(jsonData[13].__EMPTY_4);
-      setPAgro2(jsonData[13].__EMPTY_5);
-      setPAgro3(jsonData[13].__EMPTY_6);
+      jsonData[13].__EMPTY_4 ? setPAgro1(jsonData[13].__EMPTY_4) : setPAgro1(0);
+      jsonData[13].__EMPTY_5 ? setPAgro2(jsonData[13].__EMPTY_5) : setPAgro2(0);
+      jsonData[13].__EMPTY_6 ? setPAgro3(jsonData[13].__EMPTY_6) : setPAgro3(0);
 
-      setPAstu1(jsonData[14].__EMPTY_4);
-      setPAstu2(jsonData[14].__EMPTY_5);
-      setPAstu3(jsonData[14].__EMPTY_6);
+      jsonData[14].__EMPTY_4 ? setPAstu1(jsonData[14].__EMPTY_4) : setPAstu1(0);
+      jsonData[14].__EMPTY_5 ? setPAstu2(jsonData[14].__EMPTY_5) : setPAstu2(0);
+      jsonData[14].__EMPTY_6 ? setPAstu3(jsonData[14].__EMPTY_6) : setPAstu3(0);
+
+      setImpsummary1(jsonData[15].__EMPTY_4);
+      setImpsummary2(jsonData[15].__EMPTY_5);
+      setImpsummary3(jsonData[15].__EMPTY_6);
     } else if (jsonData[1].__EMPTY_2 == "tplPC1T2B") {
       //for Table 1
       setCompany(jsonData[1].รายงานสถิติธุรกิจประกันชีวิต);
@@ -547,41 +624,55 @@ export default function Monthly() {
       setOrder(jsonData[1].__EMPTY_7);
 
       //for Table 2
-      setOrd1(jsonData[5].__EMPTY_4);
-      setOrd2(jsonData[5].__EMPTY_5);
-      setOrd3(jsonData[5].__EMPTY_6);
+      jsonData[5].__EMPTY_4 ? setOrd1(jsonData[5].__EMPTY_4) : setOrd1(0);
+      jsonData[5].__EMPTY_5 ? setOrd2(jsonData[5].__EMPTY_5) : setOrd2(0);
+      jsonData[5].__EMPTY_6 ? setOrd3(jsonData[5].__EMPTY_6) : setOrd3(0);
+      setImpsumOrd(jsonData[5].__EMPTY_7);
 
-      setInd1(jsonData[6].__EMPTY_4);
-      setInd2(jsonData[6].__EMPTY_5);
-      setInd3(jsonData[6].__EMPTY_6);
+      jsonData[6].__EMPTY_4 ? setInd1(jsonData[6].__EMPTY_4) : setInd1(0);
+      jsonData[6].__EMPTY_5 ? setInd2(jsonData[6].__EMPTY_5) : setInd2(0);
+      jsonData[6].__EMPTY_6 ? setInd3(jsonData[6].__EMPTY_6) : setInd3(0);
+      setImpsumInd(jsonData[6].__EMPTY_7);
 
-      setTerm1(jsonData[8].__EMPTY_4);
-      setTerm2(jsonData[8].__EMPTY_5);
-      setTerm3(jsonData[8].__EMPTY_6);
+      jsonData[8].__EMPTY_4 ? setTerm1(jsonData[8].__EMPTY_4) : setTerm1(0);
+      jsonData[8].__EMPTY_5 ? setTerm2(jsonData[8].__EMPTY_5) : setTerm2(0);
+      jsonData[8].__EMPTY_6 ? setTerm3(jsonData[8].__EMPTY_6) : setTerm3(0);
+      setImpsumTerm(jsonData[8].__EMPTY_7);
 
-      setEndo1(jsonData[9].__EMPTY_4);
-      setEndo2(jsonData[9].__EMPTY_5);
-      setEndo3(jsonData[9].__EMPTY_6);
+      jsonData[9].__EMPTY_4 ? setEndo1(jsonData[9].__EMPTY_4) : setEndo1(0);
+      jsonData[9].__EMPTY_5 ? setEndo2(jsonData[9].__EMPTY_5) : setEndo2(0);
+      jsonData[9].__EMPTY_6 ? setEndo3(jsonData[9].__EMPTY_6) : setEndo3(0);
+      setImpsumEndo(jsonData[9].__EMPTY_7);
 
-      setMor1(jsonData[10].__EMPTY_4);
-      setMor2(jsonData[10].__EMPTY_5);
-      setMor3(jsonData[10].__EMPTY_6);
+      jsonData[10].__EMPTY_4 ? setMor1(jsonData[10].__EMPTY_4) : setMor1(0);
+      jsonData[10].__EMPTY_5 ? setMor2(jsonData[10].__EMPTY_5) : setMor2(0);
+      jsonData[10].__EMPTY_6 ? setMor3(jsonData[10].__EMPTY_6) : setMor3(0);
+      setImpsumMor(jsonData[10].__EMPTY_7);
 
-      setOth1(jsonData[11].__EMPTY_4);
-      setOth2(jsonData[11].__EMPTY_5);
-      setOth3(jsonData[11].__EMPTY_6);
+      jsonData[11].__EMPTY_4 ? setOth1(jsonData[11].__EMPTY_4) : setOth1(0);
+      jsonData[11].__EMPTY_5 ? setOth2(jsonData[11].__EMPTY_5) : setOth2(0);
+      jsonData[11].__EMPTY_6 ? setOth3(jsonData[11].__EMPTY_6) : setOth3(0);
+      setImpsumOth(jsonData[11].__EMPTY_7);
 
-      setPAind1(jsonData[12].__EMPTY_4);
-      setPAind2(jsonData[12].__EMPTY_5);
-      setPAind3(jsonData[12].__EMPTY_6);
+      jsonData[12].__EMPTY_4 ? setPAind1(jsonData[12].__EMPTY_4) : setPAind1(0);
+      jsonData[12].__EMPTY_5 ? setPAind2(jsonData[12].__EMPTY_5) : setPAind2(0);
+      jsonData[12].__EMPTY_6 ? setPAind3(jsonData[12].__EMPTY_6) : setPAind3(0);
+      setImpsumPAind(jsonData[12].__EMPTY_7);
 
-      setPAgro1(jsonData[13].__EMPTY_4);
-      setPAgro2(jsonData[13].__EMPTY_5);
-      setPAgro3(jsonData[13].__EMPTY_6);
+      jsonData[13].__EMPTY_4 ? setPAgro1(jsonData[13].__EMPTY_4) : setPAgro1(0);
+      jsonData[13].__EMPTY_5 ? setPAgro2(jsonData[13].__EMPTY_5) : setPAgro2(0);
+      jsonData[13].__EMPTY_6 ? setPAgro3(jsonData[13].__EMPTY_6) : setPAgro3(0);
+      setImpsumPAgro(jsonData[13].__EMPTY_7);
 
-      setPAstu1(jsonData[14].__EMPTY_4);
-      setPAstu2(jsonData[14].__EMPTY_5);
-      setPAstu3(jsonData[14].__EMPTY_6);
+      jsonData[14].__EMPTY_4 ? setPAstu1(jsonData[14].__EMPTY_4) : setPAstu1(0);
+      jsonData[14].__EMPTY_5 ? setPAstu2(jsonData[14].__EMPTY_5) : setPAstu2(0);
+      jsonData[14].__EMPTY_6 ? setPAstu3(jsonData[14].__EMPTY_6) : setPAstu3(0);
+      setImpsumPAstu(jsonData[14].__EMPTY_7);
+
+      setImpsummary1(jsonData[15].__EMPTY_4);
+      setImpsummary2(jsonData[15].__EMPTY_5);
+      setImpsummary3(jsonData[15].__EMPTY_6);
+      setImpsummary4(jsonData[15].__EMPTY_7);
     } else {
       Swal.fire(
         "form invalid?",
@@ -589,6 +680,89 @@ export default function Monthly() {
         "question"
       );
       handleRemove();
+    }
+  };
+
+  const CheckSummaryFormA = () => {
+    if (impsummary1.toFixed(3) !== summary1.toFixed(3)) {
+      setSumErrorMsg("ข้อมูลผลรวมของ จำนวนกรมธรรม์ ไม่ตรงกับที่คำนวณ !!");
+      handleClickSnack();
+    }
+    if (impsummary2.toFixed(3) !== summary2.toFixed(3)) {
+      setSumErrorMsg("ข้อมูลผลรวมของ จำนวนคน ไม่ตรงกับที่คำนวณ !!");
+      handleClickSnack();
+    }
+    if (impsummary3.toFixed(3) !== summary3.toFixed(3)) {
+      setSumErrorMsg(
+        "ข้อมูลผลรวมของ จำนวนเงินเอาประกันภัย ไม่ตรงกับที่คำนวณ !!"
+      );
+      handleClickSnack();
+    }
+  };
+
+  const CheckSummaryFormB = () => {
+    if (impsumOrd.toFixed(3) !== sumOrd.toFixed(3)) {
+      setSumErrorMsg("ข้อมูลผลรวมสามัญ ไม่ตรงกับที่คำนวณ !!");
+      handleClickSnack();
+    }
+    if (impsumInd.toFixed(3) !== sumInd.toFixed(3)) {
+      setSumErrorMsg("ข้อมูลผลรวมอุตสาหกรรม ไม่ตรงกับที่คำนวณ !!");
+      handleClickSnack();
+    }
+    if (impsumTerm.toFixed(3) !== sumTerm.toFixed(3)) {
+      setSumErrorMsg("ข้อมูลผลรวมแบบชั่วะยะเวลา ไม่ตรงกับที่คำนวณ !!");
+      handleClickSnack();
+    }
+    if (impsumEndo.toFixed(3) !== sumEndo.toFixed(3)) {
+      setSumErrorMsg("ข้อมูลผลรวมแบบสะสมทรัพย์ ไม่ตรงกับที่คำนวณ !!");
+      handleClickSnack();
+    }
+    if (impsumMor.toFixed(3) !== sumMor.toFixed(3)) {
+      setSumErrorMsg("ข้อมูลผลรวมแบบคุ้มครองเงินกู้จำนอง ไม่ตรงกับที่คำนวณ !!");
+      handleClickSnack();
+    }
+    if (impsumOth.toFixed(3) !== sumOth.toFixed(3)) {
+      setSumErrorMsg("ข้อมูลผลรวมแบบอื่นๆ ไม่ตรงกับที่คำนวณ !!");
+      handleClickSnack();
+    }
+    if (impsumPAind.toFixed(3) !== sumPAind.toFixed(3)) {
+      setSumErrorMsg(
+        "ข้อมูลผลรวมสัญญาหลักประกันภัยอุบัติเหตุส่วนบุคคล ไม่ตรงกับที่คำนวณ !!"
+      );
+      handleClickSnack();
+    }
+    if (impsumPAgro.toFixed(3) !== sumPAgro.toFixed(3)) {
+      setSumErrorMsg(
+        "ข้อมูลผลรวมสัญญาหลักประกันภัยอุบัติเหตุกลุ่ม ไม่ตรงกับที่คำนวณ !!"
+      );
+      handleClickSnack();
+    }
+    if (impsumPAstu.toFixed(3) !== sumPAstu.toFixed(3)) {
+      setSumErrorMsg(
+        "ข้อมูลผลรวมสัญญาหลักประกันภัยอุบัติเหตุสำหรับนักเรียน ไม่ตรงกับที่คำนวณ !!"
+      );
+      handleClickSnack();
+    }
+    if (impsummary1.toFixed(3) !== summary1.toFixed(3)) {
+      setSumErrorMsg(
+        "ข้อมูลผลรวมแบบเบี้ยประกันภัยจ่ายครั้งเดียว ไม่ตรงกับที่คำนวณ !!"
+      );
+      handleClickSnack();
+    }
+    if (impsummary2.toFixed(3) !== summary2.toFixed(3)) {
+      setSumErrorMsg("ข้อมูลผลรวมแบบเบี้ยประกันภัยปีแรก ไม่ตรงกับที่คำนวณ !!");
+      handleClickSnack();
+    }
+
+    if (impsummary3.toFixed(3) !== summary3.toFixed(3)) {
+      setSumErrorMsg(
+        "ข้อมูลผลรวมแบบเบี้ยประกันภัยปีต่ออายุ ไม่ตรงกับที่คำนวณ !!"
+      );
+      handleClickSnack();
+    }
+    if (impsummary4.toFixed(3) !== summary4.toFixed(3)) {
+      setSumErrorMsg("ข้อมูลผลรวมทั้งหมด ไม่ตรงกับที่คำนวณ !!");
+      handleClickSnack();
     }
   };
 
@@ -782,6 +956,24 @@ export default function Monthly() {
         flexDirection: "column",
       }}
     >
+      {/* <Button variant="outlined" onClick={handleClickSnack}>
+        Open success snackbar
+      </Button> */}
+      <Snackbar
+        open={openSnack}
+        autoHideDuration={10000}
+        onClose={handleCloseSnack}
+        anchorOrigin={{ vertical, horizontal }}
+      >
+        <Alert
+          onClose={handleCloseSnack}
+          severity="warning"
+          sx={{ width: "100%", fontSize: "16px", padding: 2 }}
+        >
+          {sumErrorMsg}
+        </Alert>
+      </Snackbar>
+
       {/*  ////////////////////////// Main Topic Pages ////////////////////////// */}
 
       <Box>
@@ -793,7 +985,11 @@ export default function Monthly() {
           }}
         >
           ตรวจสอบข้อมูลรายเดือน
+          {/* {sumOrd} */}
         </Typography>
+        {/* <Box style={{ border: "1px solid black" }}>{ord1}</Box>
+        <Box style={{ border: "1px solid red" }}>{ord2}</Box>
+        <Box style={{ border: "1px solid blue" }}>{ord3}</Box> */}
       </Box>
 
       {/*  ////////////////////////// Import Button ////////////////////////// */}
@@ -842,26 +1038,6 @@ export default function Monthly() {
         </Box>
         <Box sx={{ mr: 2 }}>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-            {/* <DesktopDatePicker
-              clearable
-              disableFuture
-              label="Month and Year"
-              inputFormat="YYYY-MM"
-              views={["year", "month"]}
-              value={selectmonth}
-              onChange={handleChangemonth}
-              renderInput={(params) => <TextField {...params} />}
-              InputProps={{
-                endAdornment: (
-                  <IconButton onClick={() => setSelectMonth(null)}>
-                    <ClearIcon />
-                  </IconButton>
-                ),
-              }}
-              InputAdornmentProps={{
-                position: "start",
-              }}
-            /> */}
             <DatePicker
               disableFuture
               views={["year", "month"]}
@@ -1237,9 +1413,16 @@ export default function Monthly() {
                   if (fileName) {
                     handleOpenModal();
                     handleClose();
+                    temptrim === "A"
+                      ? CheckSummaryFormA()
+                      : CheckSummaryFormB();
                   } else {
                     setErrorMsg("** Please choose file excel");
                   }
+
+                  // impsummary1 !== summary1 && handleClickSnack();
+                  // console.log("IMP", impsummary1);
+                  // console.log("SUM", summary1);
                 }}
               >
                 <Typography fontSize={14}>Import</Typography>
@@ -1271,8 +1454,11 @@ export default function Monthly() {
               <CloseIcon fontSize="inherit" onClick={handleCloseModal} />
             </IconButton>
           </Box>
+          <Typography color="error" sx={{ mt: 2 }}>
+            {sumErrorMsg}
+          </Typography>
           <Typography
-            sx={{ mt: 3, color: "#616161" }}
+            sx={{ mt: 1, color: "#616161" }}
             fontSize={14}
             fontWeight={300}
           >

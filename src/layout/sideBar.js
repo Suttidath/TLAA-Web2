@@ -13,7 +13,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { NavLink } from "react-router-dom";
-import { pageList } from "../utils/pageList";
+import { pageListAdmin, pageListUser } from "../utils/pageList";
 import Logo from "../img/logo2.png";
 
 export default function Sidebar(props) {
@@ -21,6 +21,8 @@ export default function Sidebar(props) {
   // const handleClick = () => {
   //   setOpenCollapse(!openCollapse);
   // };
+  const userData = JSON.parse(sessionStorage.getItem("tlaaUserData"));
+
   const CustomListItem = ({ to, primary, icon }) => {
     return (
       <MenuList disablePadding>
@@ -70,43 +72,33 @@ export default function Sidebar(props) {
             my: 2,
           }}
         ></Box>
-        <div className="d-flex">
-          {pageList.map((item, index) => {
-            return item.children ? (
-              <Box key={index}>
-                <ListItem sx={{ paddingY: 0 }}>
-                  {item.icon}
-                  <ListItemText sx={{ marginX: 1 }} primary={item.title} />
-                </ListItem>
-                <Collapse in={true} unmountOnExit>
-                  {item.children.map((subItem, indexSubItem) => {
-                    return (
-                      <List
-                        component="div"
-                        disablePadding
-                        sx={{ pl: 2 }}
-                        key={indexSubItem}
-                      >
-                        <CustomListItem
-                          primary={subItem.title}
-                          to={subItem.pathName}
-                          icon={subItem.icon}
-                        />
-                      </List>
-                    );
-                  })}
-                </Collapse>
-              </Box>
-            ) : (
-              <CustomListItem
-                key={index}
-                primary={item.title}
-                to={item.pathName}
-                icon={item.icon}
-              />
-            );
-          })}
-        </div>
+        {userData.isAdmin === 1 ? (
+          <div className="d-flex">
+            {pageListAdmin.map((item, index) => {
+              return (
+                <CustomListItem
+                  key={index}
+                  primary={item.title}
+                  to={item.pathName}
+                  icon={item.icon}
+                />
+              );
+            })}
+          </div>
+        ) : (
+          <div className="d-flex">
+            {pageListUser.map((item, index) => {
+              return (
+                <CustomListItem
+                  key={index}
+                  primary={item.title}
+                  to={item.pathName}
+                  icon={item.icon}
+                />
+              );
+            })}
+          </div>
+        )}
       </Box>
     </>
   );

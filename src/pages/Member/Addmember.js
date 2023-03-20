@@ -414,6 +414,11 @@ export default function User() {
               size="middle"
               fullWidth
               type="number"
+              InputProps={{
+                inputProps: {
+                  min: 0,
+                },
+              }}
               value={tax}
               onChange={(e) => {
                 setTax(e.target.value);

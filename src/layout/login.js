@@ -61,9 +61,11 @@ export default function LoginForm() {
         sessionStorage.setItem(
           "tlaaUserData",
           JSON.stringify({
-            userID: res.data.id,
-            firstname: res.data.first_name,
-            lastname: res.data.last_name,
+            userID: res.data.user.id,
+            firstname: res.data.user.first_name,
+            lastname: res.data.user.last_name,
+            email: res.data.user.email,
+            isAdmin: res.data.user.isAdmin,
           })
         );
 

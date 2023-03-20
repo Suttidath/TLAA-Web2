@@ -40,6 +40,9 @@ export default function BaseAppBar(props) {
   const { onSidebarOpen, ...other } = props;
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
+  const [userData, setUserData] = React.useState(
+    JSON.parse(sessionStorage.getItem("tlaaUserData"))
+  );
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
   };
@@ -96,6 +99,14 @@ export default function BaseAppBar(props) {
           </Typography>
 
           <Box sx={{ flexGrow: 1 }} />
+          <Box
+            sx={{ display: "flax", flexDirection: "column", marginRight: 1 }}
+          >
+            <Typography variant="h6">
+              {userData.firstname}&nbsp;{userData.lastname}
+            </Typography>
+            <Typography>{userData.email}</Typography>
+          </Box>
 
           <Avatar
             sx={{
